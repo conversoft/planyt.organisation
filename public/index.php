@@ -323,10 +323,19 @@ function compactMailBody(string $value): string
                         <div class="source gmail">Gmail · <?= h((string) ($item['account'] ?? '')) ?></div>
                         <strong><?= h((string) $item['title']) ?></strong>
                         <p>Von <?= h((string) ($item['from'] ?? '')) ?></p>
-                        <div class="mail-body"><?= nl2br(h(compactMailBody((string) ($item['body'] ?? '')))) ?></div>
+                        <div class="mail-body"><?= h(compactMailBody((string) ($item['body'] ?? ''))) ?></div>
+                        <?php
+                        $mailUrl = (string) ($item['url'] ?? '');
+                        if ($mailUrl === '' && ($item['thread_id'] ?? '') !== '') {
+                            $mailUrl = 'https://mail.google.com/mail/u/?authuser='
+                                . rawurlencode((string) ($item['account'] ?? ''))
+                                . '#all/'
+                                . rawurlencode((string) $item['thread_id']);
+                        }
+                        ?>
                         <div class="task-actions">
-                            <?php if (($item['url'] ?? '') !== ''): ?>
-                                <a class="button-link secondary-link" href="<?= h((string) $item['url']) ?>" target="_blank" rel="noopener noreferrer">E-Mail öffnen</a>
+                            <?php if ($mailUrl !== ''): ?>
+                                <a class="button-link secondary-link" href="<?= h($mailUrl) ?>" target="_blank" rel="noopener noreferrer">E-Mail öffnen</a>
                             <?php endif; ?>
                             <form method="post" action="/actions/email-state.php">
                                 <input type="hidden" name="email_id" value="<?= h((string) $item['id']) ?>">
