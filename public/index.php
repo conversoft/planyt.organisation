@@ -28,9 +28,7 @@ $liveMode = ($appKey = Env::get('APP_KEY')) !== null && strlen($appKey) >= 20;
 if ($liveMode) {
     try {
         $factory = new IntegrationFactory($root);
-        $googleAccounts = $factory->googleConfigured()
-            ? $factory->googleConnection()->accounts($userId)
-            : [];
+        $googleAccounts = $factory->googleConnection()->accounts($userId);
         $trelloAccounts = $factory->trelloConfigured()
             ? $factory->trelloConnection()->accounts($userId)
             : [];
@@ -136,11 +134,10 @@ function h(string $value): string
                     <?php foreach ($googleAccounts as $account): ?>
                         <div class="account-pill"><?= h((string) ($account['email'] ?? $account['account_id'] ?? 'Google')) ?></div>
                     <?php endforeach; ?>
-                    <?php if ($factory?->googleConfigured()): ?>
-                        <a class="button-link" href="/oauth/google/start.php">Google verbinden</a>
+                    <?php if ($googleAccounts !== []): ?>
+                        <span class="status-ok">✓ Google-Anmeldung übernommen</span>
                     <?php else: ?>
-                        <a class="button-link disabled" href="#" aria-disabled="true">Google verbinden</a>
-                        <span class="muted">OAuth-Client am Host noch nicht konfiguriert.</span>
+                        <span class="muted">Google-Anmeldung noch nicht an Planyt übergeben.</span>
                     <?php endif; ?>
                 </div>
                 <div class="connection-card">
