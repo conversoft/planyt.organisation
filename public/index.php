@@ -219,7 +219,11 @@ function h(string $value): string
                 <?php foreach ($data['unscheduled'] ?? [] as $item): ?>
                     <article class="work-item">
                         <div class="source trello">Trello · <?= h((string) ($item['board'] ?? '')) ?></div>
-                        <strong><?= h((string) $item['title']) ?></strong>
+                        <?php if (($item['url'] ?? '') !== ''): ?>
+                            <strong><a class="task-title-link" href="<?= h((string) $item['url']) ?>" target="_blank" rel="noopener noreferrer"><?= h((string) $item['title']) ?></a></strong>
+                        <?php else: ?>
+                            <strong><?= h((string) $item['title']) ?></strong>
+                        <?php endif; ?>
                         <p><?= h((string) ($item['body'] ?? '')) ?></p>
                         <?php if (($item['due'] ?? '') !== ''): ?>
                             <p class="due">Trello-Fälligkeit: <?= h((string) $item['due']) ?></p>
