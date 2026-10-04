@@ -58,4 +58,8 @@
 - Added ADR 0004 defining per-user PROAD rights, explicit-action requirements, encrypted per-user credentials, and the rule that offer creation stays disabled until the installed PROAD offer endpoint is verified.
 - Added tests for the PROAD write policy.
 
+- Added PROAD per-user connection support with encrypted personal API-key storage.
+- Added one-time installation configuration for the PROAD base URL via `php bin/planyt proad:configure`.
+- Added a simple PROAD connection card and setup guide; users only enter their personal API key.
+
 Author: OpenAI GPT-5.6 Sol
