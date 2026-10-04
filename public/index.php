@@ -112,6 +112,8 @@ function h(string $value): string
             <div class="notice">Daten wurden neu eingelesen.</div>
         <?php elseif (isset($_GET['scheduled'])): ?>
             <div class="notice">Kalenderblock wurde angelegt. Trello blieb unverändert.</div>
+        <?php elseif (isset($_GET['task_state_saved'])): ?>
+            <div class="notice">Persönlicher Planyt-Status gespeichert. Trello blieb unverändert.</div>
         <?php endif; ?>
 
         <section class="hero">
@@ -235,11 +237,25 @@ function h(string $value): string
                             </form>
                         <?php endif; ?>
 
-                        <form method="post" class="prompt-action">
-                            <input type="hidden" name="item_id" value="<?= h((string) $item['id']) ?>">
-                            <input type="hidden" name="intent" value="task-help">
-                            <button class="secondary" type="submit">Prompt erstellen</button>
-                        </form>
+                        <div class="task-actions">
+                            <form method="post" action="/actions/task-state.php">
+                                <input type="hidden" name="source_id" value="<?= h((string) $item['source_id']) ?>">
+                                <input type="hidden" name="state" value="done">
+                                <input type="hidden" name="action_token" value="<?= h($actions->issue('task-state', (string) $item['source_id'])) ?>">
+                                <button class="secondary" type="submit">Intern erledigt</button>
+                            </form>
+                            <form method="post" action="/actions/task-state.php">
+                                <input type="hidden" name="source_id" value="<?= h((string) $item['source_id']) ?>">
+                                <input type="hidden" name="state" value="irrelevant">
+                                <input type="hidden" name="action_token" value="<?= h($actions->issue('task-state', (string) $item['source_id'])) ?>">
+                                <button class="secondary" type="submit">Irrelevant</button>
+                            </form>
+                            <form method="post" class="prompt-action">
+                                <input type="hidden" name="item_id" value="<?= h((string) $item['id']) ?>">
+                                <input type="hidden" name="intent" value="task-help">
+                                <button class="secondary" type="submit">Prompt erstellen</button>
+                            </form>
+                        </div>
                     </article>
                 <?php endforeach; ?>
             </div>
