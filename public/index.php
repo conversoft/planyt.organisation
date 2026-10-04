@@ -94,7 +94,7 @@ function h(string $value): string
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Planyt Organisation</title>
-    <link rel="stylesheet" href="/assets/app.css">
+    <link rel="stylesheet" href="/assets/app.css?v=<?= h((string) filemtime($root . '/public/assets/app.css')) ?>">
 </head>
 <body>
 <div class="shell">
