@@ -50,7 +50,7 @@ try {
             'source' => 'trello',
             'source_id' => $sourceId,
         ],
-        new ExplicitUserAction($actionToken, (int) $action['issued_at']),
+        new ExplicitUserAction($actionToken, time()),
     );
 
     (new SyncService(
