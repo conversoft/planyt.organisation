@@ -1,13 +1,14 @@
 # planyt.organisation
 
-Planyt Organisation is a personal work overview for Trello, Gmail, Google Drive and Google Calendar.
+Planyt Organisation is a personal work overview for Trello, Gmail, Google Drive, Google Calendar and optionally PROAD.
 
 ## Product rules
 
 - Trello remains the source of truth for tasks and is strictly read-only.
 - Gmail is strictly read-only. Planyt cannot send mail or create drafts.
 - Google Drive is read-only.
-- Google Calendar is the only integration with write access and only receives explicitly confirmed personal planning blocks.
+- Google Calendar receives explicitly confirmed personal planning blocks.
+- PROAD may receive explicitly confirmed business actions such as time bookings. Additional create actions are capability-gated by the connected user's PROAD rights.
 - Calendar state never completes, moves or changes Trello cards.
 - The Prompt Compiler creates copyable text only. Planyt has no outbound AI or communication action.
 
@@ -77,6 +78,25 @@ After that, every employee only uses the **Trello verbinden** button.
 
 After the one-time installation setup, each user only clicks **Mit Google anmelden**. Google handles account selection and consent, then Planyt stores the user's OAuth connection encrypted in runtime storage.
 
+## PROAD integration boundary
+
+PROAD is planned as an optional integration with per-user rights.
+
+Initial target for regular users:
+
+- read available PROAD projects,
+- book working time to a project/service code after explicit confirmation.
+
+Additional capabilities for users whose PROAD account allows them:
+
+- create projects,
+- create contacts,
+- create offers once the exact offer endpoint of the installed PROAD version has been verified.
+
+Planyt never invents an "admin" role on its own. It derives capabilities from PROAD permissions and lets PROAD enforce the final authorization.
+
+Architecture details: [ADR 0004](docs/adr/0004-proad-integration.md).
+
 ## Runtime data
 
 Runtime data never belongs in Git:
@@ -94,7 +114,7 @@ storage/
 
 `storage/system/config.json` contains the automatically generated installation key and optional installation-level provider configuration.
 
-`tokens.json` contains the user's Google and Trello connections. OAuth payloads are encrypted with libsodium before they are written.
+`tokens.json` contains the user's Google, Trello and future PROAD connection credentials. Provider payloads are encrypted with libsodium before they are written.
 
 ## Synchronization
 
