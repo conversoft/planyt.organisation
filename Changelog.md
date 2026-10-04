@@ -38,4 +38,6 @@
 - Added a step-by-step Trello OAuth admin setup guide and linked it from the README.
 - Bound Trello OAuth state to the initiating user and preserved rotated refresh tokens.
 
+- Fixed PHP 8.5 deprecation warnings by removing the no-op `curl_close()` call from the HTTP client.
+
 Author: OpenAI GPT-5.6 Sol
