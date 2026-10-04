@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Planyt\Organisation\Integration;
 
-use Planyt\Organisation\Config\Env;
+use Planyt\Organisation\Config\InstallationConfig;
 use Planyt\Organisation\Http\CurlHttpClient;
 use Planyt\Organisation\Integration\Google\CalendarClient;
 use Planyt\Organisation\Integration\Google\DriveSource;
@@ -19,6 +19,7 @@ final class IntegrationFactory
 {
     private CurlHttpClient $http;
     private EncryptedTokenStore $tokens;
+    private InstallationConfig $installation;
     private ?GoogleConnection $googleConnection = null;
     private ?TrelloOAuthClient $trelloOAuth = null;
     private ?TrelloConnection $trelloConnection = null;
@@ -26,9 +27,10 @@ final class IntegrationFactory
     public function __construct(private readonly string $root)
     {
         $this->http = new CurlHttpClient();
+        $this->installation = new InstallationConfig($this->root . '/storage');
         $this->tokens = new EncryptedTokenStore(
             $this->root . '/storage',
-            Env::require('APP_KEY'),
+            $this->installation->appKey(),
         );
     }
 
@@ -39,9 +41,7 @@ final class IntegrationFactory
 
     public function trelloConfigured(): bool
     {
-        return Env::get('TRELLO_CLIENT_ID') !== null
-            && Env::get('TRELLO_CLIENT_SECRET') !== null
-            && Env::get('TRELLO_REDIRECT_URI') !== null;
+        return $this->installation->trello() !== null;
     }
 
     public function googleConnection(): GoogleConnection
@@ -69,11 +69,17 @@ final class IntegrationFactory
 
     public function trelloOAuth(): TrelloOAuthClient
     {
+        $config = $this->installation->trello();
+
+        if ($config === null) {
+            throw new \RuntimeException('Trello is not enabled for this installation.');
+        }
+
         return $this->trelloOAuth ??= new TrelloOAuthClient(
             $this->http,
-            Env::require('TRELLO_CLIENT_ID'),
-            Env::require('TRELLO_CLIENT_SECRET'),
-            Env::require('TRELLO_REDIRECT_URI'),
+            $config['client_id'],
+            $config['client_secret'],
+            $config['redirect_uri'],
         );
     }
 
