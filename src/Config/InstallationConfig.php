@@ -59,6 +59,35 @@ final class InstallationConfig
         $this->save($document);
     }
 
+    /** @return array{base_url:string}|null */
+    public function proad(): ?array
+    {
+        $document = $this->load();
+        $proad = $document['proad'] ?? null;
+
+        if (!is_array($proad)) {
+            return null;
+        }
+
+        $baseUrl = rtrim(trim((string) ($proad['base_url'] ?? '')), '/');
+
+        if ($baseUrl === '') {
+            return null;
+        }
+
+        return ['base_url' => $baseUrl];
+    }
+
+    /** @param array{base_url:string} $config */
+    public function saveProad(array $config): void
+    {
+        $document = $this->load();
+        $document['proad'] = [
+            'base_url' => rtrim(trim($config['base_url']), '/'),
+        ];
+        $this->save($document);
+    }
+
     /** @return array{client_id:string,client_secret:string,redirect_uri:string}|null */
     public function trello(): ?array
     {
