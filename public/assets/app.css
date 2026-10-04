@@ -94,8 +94,12 @@ h3 { font-size: 18px; margin-bottom: 0; }
 .actions form { margin: 0; }
 .mail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding-top: 16px; }
 .mail-card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-.mail-body {
+.mail-body-wrapper {
+    position: relative;
     margin: 14px 0;
+}
+.mail-body {
+    margin: 0;
     padding-left: 12px;
     border-left: 3px solid var(--line);
     color: #444941;
@@ -105,6 +109,24 @@ h3 { font-size: 18px; margin-bottom: 0; }
     max-width: 100%;
     min-width: 0;
     line-height: 1.45;
+}
+.mail-body.is-collapsed {
+    max-height: 800px;
+    overflow: hidden;
+}
+.mail-more {
+    margin-top: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.mail-more:hover {
+    background: transparent;
 }
 .mail-card { min-width: 0; overflow: hidden; }
 .mail-card strong,
