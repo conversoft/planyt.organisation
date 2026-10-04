@@ -74,4 +74,6 @@
 
 - Added an `E-Mail öffnen` action to Gmail attention cards using the exact Gmail thread link for the connected account. Spark-specific deep links remain unavailable because Spark generates them internally.
 
+- Fixed email preview spacing by removing duplicate newline rendering, and made `E-Mail öffnen` available for already-synced mail items by deriving the Gmail thread URL from stored thread/account data when needed.
+
 Author: OpenAI GPT-5.6 Sol
