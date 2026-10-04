@@ -62,4 +62,6 @@
 - Added one-time installation configuration for the PROAD base URL via `php bin/planyt proad:configure`.
 - Added a simple PROAD connection card and setup guide; users only enter their personal API key.
 
+- Converted the connections block to a collapsible `<details>`/`<summary>` section so it can be folded away when not needed.
+
 Author: OpenAI GPT-5.6 Sol
