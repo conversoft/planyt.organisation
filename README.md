@@ -59,13 +59,17 @@ The installation stores the Google OAuth client configuration in protected runti
 
 ## One-time Trello setup
 
-Trello's OAuth application credentials are installation-level settings. They are configured once by the administrator, never by employees:
+Trello's OAuth application credentials are installation-level settings. They are configured once by the administrator, never by employees.
+
+Detailed step-by-step instructions:
+
+- [Trello OAuth einmalig einrichten](docs/admin/trello-oauth-setup.md)
+
+The short setup command is:
 
 ```bash
 php bin/planyt trello:configure
 ```
-
-The command asks interactively for Client-ID, Client-Secret and the callback URL and stores them in protected runtime configuration. They do not belong in Git or in a user-facing settings screen.
 
 After that, every employee only uses the **Trello verbinden** button.
 
