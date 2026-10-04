@@ -190,3 +190,6 @@ footer { color: var(--muted); font-size: 12px; padding: 24px 4px 8px; }
 }
 .connections:not([open]) .connection-grid { display: none; }
 .connections[open] .connection-grid { margin-top: 16px; }
+
+.secondary-link { background: transparent; color: var(--ink); border: 1px solid var(--line); margin-top: 0; }
+.secondary-link:hover { background: #f8f9f6; }
