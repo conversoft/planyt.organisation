@@ -13,6 +13,8 @@ These rules apply to every human contributor and AI agent.
 - Google Drive is read-only by default.
 - Google Calendar is the scheduling target and may be written only after explicit user intent.
 - Calendar state must never complete, move or otherwise mutate a Trello card.
+- PROAD is optional. Reads follow the connected user's PROAD rights. Any PROAD write requires an explicit user action and a matching capability derived from PROAD permissions.
+- PROAD write access must never imply or cause a Trello or Gmail mutation.
 - The baseline has no server-side AI dependency. The Prompt Compiler only creates copyable text.
 
 ## Engineering
