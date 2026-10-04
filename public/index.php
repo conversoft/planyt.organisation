@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Planyt\Organisation\Config\DotEnv;
-use Planyt\Organisation\Config\Env;
+use Planyt\Organisation\Auth\CurrentUser;
+use Planyt\Organisation\Auth\ExistingGoogleLogin;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\PromptCompiler\PromptCompiler;
 use Planyt\Organisation\Storage\JsonDashboardRepository;
@@ -13,9 +13,7 @@ use Planyt\Organisation\Workflow\UserActionSession;
 
 $root = dirname(__DIR__);
 require $root . '/vendor/autoload.php';
-DotEnv::load($root . '/.env');
-
-$userId = Env::get('PLANYT_USER_ID', 'demo') ?? 'demo';
+$userId = CurrentUser::id();
 $compiler = new PromptCompiler();
 $preferences = (new UserPreferencesRepository($root . '/storage'))->load($userId);
 $prompt = null;
@@ -23,11 +21,12 @@ $error = $_GET['integration_error'] ?? null;
 $factory = null;
 $googleAccounts = [];
 $trelloAccounts = [];
-$liveMode = ($appKey = Env::get('APP_KEY')) !== null && strlen($appKey) >= 20;
+$liveMode = true;
 
 if ($liveMode) {
     try {
         $factory = new IntegrationFactory($root);
+        (new ExistingGoogleLogin($factory->googleConnection()))->importFromSession($userId);
         $googleAccounts = $factory->googleConnection()->accounts($userId);
         $trelloAccounts = $factory->trelloConfigured()
             ? $factory->trelloConnection()->accounts($userId)
