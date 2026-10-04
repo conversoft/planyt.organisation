@@ -68,4 +68,6 @@
 
 - Added automatic CSS cache busting so frontend style changes, including the prominent connections toggle, appear immediately after updates.
 
+- Email previews now preserve line breaks and aggressively wrap long URLs/signature fragments so mail content cannot overflow its card.
+
 Author: OpenAI GPT-5.6 Sol
