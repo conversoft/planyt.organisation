@@ -2,17 +2,45 @@
 
 declare(strict_types=1);
 
+use Planyt\Organisation\Config\DotEnv;
+use Planyt\Organisation\Config\Env;
+use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\PromptCompiler\PromptCompiler;
 use Planyt\Organisation\Storage\JsonDashboardRepository;
+use Planyt\Organisation\Storage\UserStateRepository;
+use Planyt\Organisation\Workflow\UserActionSession;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+$root = dirname(__DIR__);
+require $root . '/vendor/autoload.php';
+DotEnv::load($root . '/.env');
 
-$repository = new JsonDashboardRepository();
-$data = $repository->load(dirname(__DIR__) . '/resources/demo/dashboard.json');
+$userId = Env::get('PLANYT_USER_ID', 'demo') ?? 'demo';
 $compiler = new PromptCompiler();
-
 $prompt = null;
-$error = null;
+$error = $_GET['integration_error'] ?? null;
+$factory = null;
+$googleAccounts = [];
+$trelloAccounts = [];
+$liveMode = ($appKey = Env::get('APP_KEY')) !== null && strlen($appKey) >= 20;
+
+if ($liveMode) {
+    try {
+        $factory = new IntegrationFactory($root);
+        $googleAccounts = $factory->googleConfigured()
+            ? $factory->googleConnection()->accounts($userId)
+            : [];
+        $trelloAccounts = $factory->trelloConfigured()
+            ? $factory->trelloConnection()->accounts($userId)
+            : [];
+        $data = (new UserStateRepository($root . '/storage'))->load($userId);
+    } catch (Throwable $exception) {
+        $error = $exception->getMessage();
+        $data = (new JsonDashboardRepository())->load($root . '/resources/demo/dashboard.json');
+        $liveMode = false;
+    }
+} else {
+    $data = (new JsonDashboardRepository())->load($root . '/resources/demo/dashboard.json');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $itemId = (string) ($_POST['item_id'] ?? '');
@@ -36,6 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$actions = new UserActionSession();
+
 function h(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -57,31 +87,78 @@ function h(string $value): string
             <a class="active" href="#">Heute</a>
             <a href="#planung">Noch terminieren</a>
             <a href="#emails">E-Mails</a>
+            <a href="#connections">Verbindungen</a>
         </nav>
         <div class="source-status">
-            <p><strong>Quellen</strong></p>
+            <p><strong>Systemgrenzen</strong></p>
             <p>● Trello <small>read-only</small></p>
             <p>● Gmail <small>read-only</small></p>
+            <p>● Drive <small>read-only</small></p>
             <p>● Calendar <small>read/write</small></p>
         </div>
     </aside>
+
     <main>
         <header class="topbar">
             <div>
                 <p class="eyebrow">Persönliche Arbeitsübersicht</p>
-                <h1>Guten Abend, <?= h((string) ($data['user']['name'] ?? '')) ?></h1>
+                <h1><?= $liveMode ? 'Deine Organisation' : 'Prototyp-Demo' ?></h1>
             </div>
-            <div class="badge">Prototype 0.1</div>
+            <div class="badge"><?= $liveMode ? 'Live' : 'Demo' ?></div>
         </header>
+
+        <?php if ($error !== null): ?>
+            <div class="notice error"><?= h((string) $error) ?></div>
+        <?php elseif (isset($_GET['synced'])): ?>
+            <div class="notice">Daten wurden neu eingelesen.</div>
+        <?php elseif (isset($_GET['scheduled'])): ?>
+            <div class="notice">Kalenderblock wurde angelegt. Trello blieb unverändert.</div>
+        <?php endif; ?>
 
         <section class="hero">
             <p class="eyebrow">Heute im Blick</p>
             <h2><?= count($data['today'] ?? []) ?> Termine · <?= count($data['unscheduled'] ?? []) ?> noch zu planen · <?= count($data['emails'] ?? []) ?> Mails mit Handlungsbedarf</h2>
+            <?php if ($liveMode): ?>
+                <form method="post" action="/actions/sync.php" class="inline-form">
+                    <button type="submit">Jetzt synchronisieren</button>
+                </form>
+            <?php endif; ?>
+        </section>
+
+        <section class="panel connections" id="connections">
+            <div class="panel-title"><h3>Verbindungen</h3><span>pro Nutzer separat</span></div>
+            <div class="connection-grid">
+                <div class="connection-card">
+                    <strong>Google</strong>
+                    <p>Gmail lesen · Drive lesen · Calendar lesen/schreiben</p>
+                    <?php foreach ($googleAccounts as $account): ?>
+                        <div class="account-pill"><?= h((string) ($account['email'] ?? $account['account_id'] ?? 'Google')) ?></div>
+                    <?php endforeach; ?>
+                    <?php if ($factory?->googleConfigured()): ?>
+                        <a class="button-link" href="/oauth/google/start.php">Google-Konto verbinden</a>
+                    <?php else: ?>
+                        <span class="muted">Google noch nicht am Host konfiguriert.</span>
+                    <?php endif; ?>
+                </div>
+                <div class="connection-card">
+                    <strong>Trello</strong>
+                    <p>Boards, Listen und zugewiesene Karten ausschließlich lesen</p>
+                    <?php foreach ($trelloAccounts as $account): ?>
+                        <div class="account-pill"><?= h((string) ($account['full_name'] ?? $account['username'] ?? 'Trello')) ?></div>
+                    <?php endforeach; ?>
+                    <?php if ($factory?->trelloConfigured()): ?>
+                        <a class="button-link" href="/oauth/trello/start.php">Trello verbinden</a>
+                    <?php else: ?>
+                        <span class="muted">Trello noch nicht am Host konfiguriert.</span>
+                    <?php endif; ?>
+                </div>
+            </div>
         </section>
 
         <section class="grid">
             <div class="panel">
                 <div class="panel-title"><h3>Heute</h3><span>Google Calendar</span></div>
+                <?php if (($data['today'] ?? []) === []): ?><p class="empty">Keine Termine geladen.</p><?php endif; ?>
                 <?php foreach ($data['today'] ?? [] as $item): ?>
                     <article class="timeline-item">
                         <time><?= h((string) $item['time']) ?></time>
@@ -91,39 +168,65 @@ function h(string $value): string
             </div>
 
             <div class="panel warning" id="planung">
-                <div class="panel-title"><h3>Noch terminieren</h3><span>Entscheidung nötig</span></div>
+                <div class="panel-title"><h3>Noch terminieren</h3><span>bewusste Entscheidung nötig</span></div>
+                <?php if (($data['unscheduled'] ?? []) === []): ?><p class="empty">Keine offenen Karten ohne Arbeitsblock.</p><?php endif; ?>
                 <?php foreach ($data['unscheduled'] ?? [] as $item): ?>
                     <article class="work-item">
-                        <div class="source trello">Trello</div>
+                        <div class="source trello">Trello · <?= h((string) ($item['board'] ?? '')) ?></div>
                         <strong><?= h((string) $item['title']) ?></strong>
-                        <p><?= h((string) $item['context']) ?></p>
+                        <p><?= h((string) ($item['body'] ?? '')) ?></p>
                         <?php if (($item['due'] ?? '') !== ''): ?>
-                            <p class="due">Fällig: <?= h((string) $item['due']) ?></p>
+                            <p class="due">Trello-Fälligkeit: <?= h((string) $item['due']) ?></p>
                         <?php else: ?>
-                            <p class="due critical">Kein Termin vorhanden – bitte terminieren.</p>
+                            <p class="due critical">Keine Trello-Fälligkeit – bitte bewusst terminieren.</p>
                         <?php endif; ?>
-                        <div class="actions">
-                            <button type="button" disabled>Termin planen</button>
-                            <form method="post">
-                                <input type="hidden" name="item_id" value="<?= h((string) $item['id']) ?>">
-                                <input type="hidden" name="intent" value="task-help">
-                                <button class="secondary" type="submit">Prompt erstellen</button>
+
+                        <?php if ($googleAccounts !== [] && isset($item['source_id'])): ?>
+                            <form method="post" action="/actions/schedule.php" class="schedule-form">
+                                <input type="hidden" name="source_id" value="<?= h((string) $item['source_id']) ?>">
+                                <input type="hidden" name="title" value="<?= h((string) $item['title']) ?>">
+                                <input type="hidden" name="action_token" value="<?= h($actions->issue('schedule', (string) $item['source_id'])) ?>">
+                                <label>Datum <input type="date" name="date" required></label>
+                                <label>Uhrzeit <input type="time" name="time" required></label>
+                                <label>Dauer
+                                    <select name="duration">
+                                        <option value="30">30 Min.</option>
+                                        <option value="60" selected>60 Min.</option>
+                                        <option value="90">90 Min.</option>
+                                        <option value="120">120 Min.</option>
+                                    </select>
+                                </label>
+                                <label>Kalender
+                                    <select name="account_id">
+                                        <?php foreach ($googleAccounts as $account): ?>
+                                            <option value="<?= h((string) $account['account_id']) ?>"><?= h((string) ($account['email'] ?? $account['account_id'])) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </label>
+                                <button type="submit">In Kalender einplanen</button>
                             </form>
-                        </div>
+                        <?php endif; ?>
+
+                        <form method="post" class="prompt-action">
+                            <input type="hidden" name="item_id" value="<?= h((string) $item['id']) ?>">
+                            <input type="hidden" name="intent" value="task-help">
+                            <button class="secondary" type="submit">Prompt erstellen</button>
+                        </form>
                     </article>
                 <?php endforeach; ?>
             </div>
         </section>
 
         <section class="panel" id="emails">
-            <div class="panel-title"><h3>E-Mails, die Aufmerksamkeit brauchen</h3><span>nur gelesen – Versand nicht möglich</span></div>
+            <div class="panel-title"><h3>E-Mails, die Aufmerksamkeit brauchen</h3><span>read-only · kein Versandweg</span></div>
             <div class="mail-grid">
+                <?php if (($data['emails'] ?? []) === []): ?><p class="empty">Keine Antwortkandidaten geladen.</p><?php endif; ?>
                 <?php foreach ($data['emails'] ?? [] as $item): ?>
                     <article class="mail-card">
-                        <div class="source gmail">Gmail · <?= h((string) $item['account']) ?></div>
+                        <div class="source gmail">Gmail · <?= h((string) ($item['account'] ?? '')) ?></div>
                         <strong><?= h((string) $item['title']) ?></strong>
-                        <p>Von <?= h((string) $item['from']) ?></p>
-                        <blockquote><?= h((string) $item['body']) ?></blockquote>
+                        <p>Von <?= h((string) ($item['from'] ?? '')) ?></p>
+                        <blockquote><?= h((string) ($item['body'] ?? '')) ?></blockquote>
                         <form method="post">
                             <input type="hidden" name="item_id" value="<?= h((string) $item['id']) ?>">
                             <input type="hidden" name="intent" value="email-reply">
@@ -134,20 +237,16 @@ function h(string $value): string
             </div>
         </section>
 
-        <?php if ($prompt !== null || $error !== null): ?>
+        <?php if ($prompt !== null): ?>
             <section class="panel prompt-panel" id="prompt">
                 <div class="panel-title"><h3>Prompt Compiler</h3><span>keine API · kein Versand</span></div>
-                <?php if ($error !== null): ?>
-                    <p><?= h($error) ?></p>
-                <?php else: ?>
-                    <textarea id="compiledPrompt" readonly><?= h((string) $prompt) ?></textarea>
-                    <button type="button" data-copy-prompt>Prompt kopieren</button>
-                    <p class="hint">Planyt kopiert nur Text in die Zwischenablage. Es sendet nichts an ChatGPT oder Gmail.</p>
-                <?php endif; ?>
+                <textarea id="compiledPrompt" readonly><?= h((string) $prompt) ?></textarea>
+                <button type="button" data-copy-prompt>Prompt kopieren</button>
+                <p class="hint">Planyt übergibt den Prompt an niemanden. Er wird nur in die Zwischenablage kopiert.</p>
             </section>
         <?php endif; ?>
 
-        <footer>Trello und Gmail bleiben read-only. Kalenderplanung verändert niemals den Status einer Trello-Karte.</footer>
+        <footer>Trello, Gmail und Drive sind technisch nur lesend vorgesehen. Nur Google Calendar erhält bewusst bestätigte Schreibaktionen.</footer>
     </main>
 </div>
 <script src="/assets/app.js"></script>
