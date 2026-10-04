@@ -46,6 +46,19 @@
         "https://www.googleapis.com/auth/calendar.events.owned"
       ],
       "requiresExplicitUserAction": true
+    },
+    "proad": {
+      "mode": "capability-gated-read-write",
+      "auth": "per-user-api-key",
+      "requiresExplicitUserAction": true,
+      "capabilities": [
+        "read_projects",
+        "book_time",
+        "create_project",
+        "create_contact",
+        "create_offer"
+      ],
+      "offerCreation": "disabled-until-endpoint-verified"
     }
   },
   "promptCompiler": {
