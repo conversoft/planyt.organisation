@@ -18,7 +18,7 @@ final class UserPreferencesRepository
         $path = $this->path($userId);
 
         if (!is_file($path)) {
-            return ['trello_boards' => [], 'calendar_account' => null];
+            return ['trello_boards' => [], 'calendar_account' => null, 'task_states' => []];
         }
 
         $raw = file_get_contents($path);
