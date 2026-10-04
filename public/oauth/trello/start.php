@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\OAuth\OAuthSession;
 use Planyt\Organisation\OAuth\Pkce;
@@ -14,6 +15,7 @@ $session = new OAuthSession();
 $state = $session->begin('trello', [
     'started_at' => time(),
     'code_verifier' => $pkce['verifier'],
+    'user_id' => CurrentUser::id(),
 ]);
 
 $factory = new IntegrationFactory($root);
