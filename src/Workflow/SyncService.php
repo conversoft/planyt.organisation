@@ -89,6 +89,7 @@ final class SyncService
         }
 
         $taskStates = is_array($prefs['task_states'] ?? null) ? $prefs['task_states'] : [];
+        $emailStates = is_array($prefs['email_states'] ?? null) ? $prefs['email_states'] : [];
 
         $unscheduled = array_values(array_filter(
             $trelloItems,
@@ -147,7 +148,13 @@ final class SyncService
             'unscheduled' => $unscheduled,
             'emails' => array_values(array_filter(
                 $emails,
-                static fn (array $mail): bool => (bool) ($mail['needsReply'] ?? false),
+                static function (array $mail) use ($emailStates): bool {
+                    $id = (string) ($mail['id'] ?? '');
+
+                    return (bool) ($mail['needsReply'] ?? false)
+                        && $id !== ''
+                        && (string) ($emailStates[$id] ?? '') !== 'hidden';
+                },
             )),
             'trello' => $trelloItems,
             'boards' => $boardsByAccount,
