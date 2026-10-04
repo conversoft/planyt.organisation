@@ -10,6 +10,7 @@ use Planyt\Organisation\Integration\Google\CalendarClient;
 use Planyt\Organisation\Integration\Google\DriveSource;
 use Planyt\Organisation\Integration\Google\GmailSource;
 use Planyt\Organisation\Integration\Google\GoogleConnection;
+use Planyt\Organisation\Integration\Google\GoogleOAuthClient;
 use Planyt\Organisation\Integration\Trello\TrelloConnection;
 use Planyt\Organisation\Integration\Trello\TrelloOAuthClient;
 use Planyt\Organisation\Integration\Trello\TrelloSource;
@@ -20,6 +21,7 @@ final class IntegrationFactory
     private CurlHttpClient $http;
     private EncryptedTokenStore $tokens;
     private InstallationConfig $installation;
+    private ?GoogleOAuthClient $googleOAuth = null;
     private ?GoogleConnection $googleConnection = null;
     private ?TrelloOAuthClient $trelloOAuth = null;
     private ?TrelloConnection $trelloConnection = null;
@@ -34,6 +36,11 @@ final class IntegrationFactory
         );
     }
 
+    public function googleConfigured(): bool
+    {
+        return $this->installation->google() !== null;
+    }
+
     public function googleAvailable(string $userId): bool
     {
         return $this->googleConnection()->accounts($userId) !== [];
@@ -44,11 +51,28 @@ final class IntegrationFactory
         return $this->installation->trello() !== null;
     }
 
+    public function googleOAuth(): GoogleOAuthClient
+    {
+        $config = $this->installation->google();
+
+        if ($config === null) {
+            throw new \RuntimeException('Google is not enabled for this installation.');
+        }
+
+        return $this->googleOAuth ??= new GoogleOAuthClient(
+            $this->http,
+            $config['client_id'],
+            $config['client_secret'],
+            $config['redirect_uri'],
+        );
+    }
+
     public function googleConnection(): GoogleConnection
     {
         return $this->googleConnection ??= new GoogleConnection(
             $this->http,
             $this->tokens,
+            $this->googleConfigured() ? $this->googleOAuth() : null,
         );
     }
 
