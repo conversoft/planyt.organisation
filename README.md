@@ -78,6 +78,20 @@ After that, every employee only uses the **Trello verbinden** button.
 
 After the one-time installation setup, each user only clicks **Mit Google anmelden**. Google handles account selection and consent, then Planyt stores the user's OAuth connection encrypted in runtime storage.
 
+## PROAD setup
+
+Detailed setup instructions:
+
+- [PROAD einmalig verbinden](docs/admin/proad-setup.md)
+
+Installation-level setup:
+
+```bash
+php bin/planyt proad:configure
+```
+
+Each user then enters only their personal PROAD API key under **Verbindungen → PROAD**.
+
 ## PROAD integration boundary
 
 PROAD is planned as an optional integration with per-user rights.
