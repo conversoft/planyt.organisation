@@ -70,4 +70,6 @@
 
 - Email previews now preserve line breaks and aggressively wrap long URLs/signature fragments so mail content cannot overflow its card.
 
+- Email previews now collapse repeated blank lines to a single blank line while preserving normal paragraph breaks.
+
 Author: OpenAI GPT-5.6 Sol
