@@ -325,6 +325,9 @@ function compactMailBody(string $value): string
                         <p>Von <?= h((string) ($item['from'] ?? '')) ?></p>
                         <div class="mail-body"><?= nl2br(h(compactMailBody((string) ($item['body'] ?? '')))) ?></div>
                         <div class="task-actions">
+                            <?php if (($item['url'] ?? '') !== ''): ?>
+                                <a class="button-link secondary-link" href="<?= h((string) $item['url']) ?>" target="_blank" rel="noopener noreferrer">E-Mail öffnen</a>
+                            <?php endif; ?>
                             <form method="post" action="/actions/email-state.php">
                                 <input type="hidden" name="email_id" value="<?= h((string) $item['id']) ?>">
                                 <input type="hidden" name="state" value="hidden">
