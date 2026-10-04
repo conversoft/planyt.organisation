@@ -52,4 +52,6 @@
 
 - Tuned the desktop UI for comfortable use at 100% browser zoom: narrower content column, slightly larger typography, more compact connection proportions, and tighter planning cards/forms.
 
+- Added direct links from Trello task titles in Planyt to the original Trello cards; links open in a new tab and do not change Trello.
+
 Author: OpenAI GPT-5.6 Sol
