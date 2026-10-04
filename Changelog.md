@@ -45,4 +45,7 @@
 - Trello items marked `done` or `irrelevant` are removed from the local dashboard immediately and remain filtered on future syncs; Trello is never changed.
 - Added a per-user `Ausblenden` action for Gmail attention items. Hidden mail threads stay out of Planyt on future syncs while Gmail remains read-only.
 
+- Fixed local Trello and Gmail status buttons by replacing brittle one-time PHP-session action tokens with stateless HMAC-signed local-action tokens.
+- The dashboard now also filters locally completed/irrelevant Trello cards on page load so they disappear immediately and remain hidden without touching Trello.
+
 Author: OpenAI GPT-5.6 Sol
