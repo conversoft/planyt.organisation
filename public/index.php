@@ -114,6 +114,8 @@ function h(string $value): string
             <div class="notice">Kalenderblock wurde angelegt. Trello blieb unverändert.</div>
         <?php elseif (isset($_GET['task_state_saved'])): ?>
             <div class="notice">Persönlicher Planyt-Status gespeichert. Trello blieb unverändert.</div>
+        <?php elseif (isset($_GET['email_state_saved'])): ?>
+            <div class="notice">E-Mail in Planyt ausgeblendet. Gmail blieb unverändert.</div>
         <?php endif; ?>
 
         <section class="hero">
@@ -271,11 +273,19 @@ function h(string $value): string
                         <strong><?= h((string) $item['title']) ?></strong>
                         <p>Von <?= h((string) ($item['from'] ?? '')) ?></p>
                         <blockquote><?= h((string) ($item['body'] ?? '')) ?></blockquote>
-                        <form method="post">
-                            <input type="hidden" name="item_id" value="<?= h((string) $item['id']) ?>">
-                            <input type="hidden" name="intent" value="email-reply">
-                            <button class="secondary" type="submit">Antwort-Prompt erstellen</button>
-                        </form>
+                        <div class="task-actions">
+                            <form method="post" action="/actions/email-state.php">
+                                <input type="hidden" name="email_id" value="<?= h((string) $item['id']) ?>">
+                                <input type="hidden" name="state" value="hidden">
+                                <input type="hidden" name="action_token" value="<?= h($actions->issue('email-state', (string) $item['id'])) ?>">
+                                <button class="secondary" type="submit">Ausblenden</button>
+                            </form>
+                            <form method="post">
+                                <input type="hidden" name="item_id" value="<?= h((string) $item['id']) ?>">
+                                <input type="hidden" name="intent" value="email-reply">
+                                <button class="secondary" type="submit">Antwort-Prompt erstellen</button>
+                            </form>
+                        </div>
                     </article>
                 <?php endforeach; ?>
             </div>
