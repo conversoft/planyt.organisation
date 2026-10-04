@@ -6,6 +6,10 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 $command = $argv[1] ?? 'help';
 
+if (is_file($root . '/vendor/autoload.php')) {
+    require $root . '/vendor/autoload.php';
+}
+
 function run(string $command, string $cwd): int
 {
     passthru('cd ' . escapeshellarg($cwd) . ' && ' . $command, $exitCode);
@@ -23,7 +27,8 @@ if ($command === 'help') {
     output('');
     output('Commands:');
     output('  planyt update   Safely fast-forward this installation to origin/main');
-    output('  planyt doctor   Check the local runtime');
+    output('  planyt doctor              Check the local runtime');
+    output('  planyt trello:configure    Configure Trello once for this installation');
     exit(0);
 }
 
@@ -32,6 +37,49 @@ if ($command === 'doctor') {
     output('Repository: ' . $root);
     output('Storage writable: ' . (is_writable($root . '/storage') ? 'yes' : 'no'));
     exit(PHP_VERSION_ID >= 80400 ? 0 : 1);
+}
+
+if ($command === 'trello:configure') {
+    if (!class_exists(\Planyt\Organisation\Config\InstallationConfig::class)) {
+        fwrite(STDERR, 'Run composer install first.' . PHP_EOL);
+        exit(1);
+    }
+
+    $prompt = static function (string $label, bool $secret = false): string {
+        fwrite(STDOUT, $label . ': ');
+
+        if ($secret && DIRECTORY_SEPARATOR !== '\\') {
+            shell_exec('stty -echo');
+        }
+
+        $value = trim((string) fgets(STDIN));
+
+        if ($secret && DIRECTORY_SEPARATOR !== '\\') {
+            shell_exec('stty echo');
+            fwrite(STDOUT, PHP_EOL);
+        }
+
+        return $value;
+    };
+
+    output('Trello einmalig fuer diese Installation konfigurieren.');
+    $clientId = $prompt('Client-ID');
+    $clientSecret = $prompt('Client-Secret', true);
+    $redirectUri = $prompt('Callback-URL');
+
+    if ($clientId === '' || $clientSecret === '' || $redirectUri === '') {
+        fwrite(STDERR, 'Alle drei Angaben werden benoetigt.' . PHP_EOL);
+        exit(1);
+    }
+
+    (new \Planyt\Organisation\Config\InstallationConfig($root . '/storage'))->saveTrello([
+        'client_id' => $clientId,
+        'client_secret' => $clientSecret,
+        'redirect_uri' => $redirectUri,
+    ]);
+
+    output('Trello ist fuer diese Installation freigeschaltet.');
+    exit(0);
 }
 
 if ($command !== 'update') {
