@@ -123,3 +123,5 @@ footer { color: var(--muted); font-size: 12px; padding: 24px 4px 8px; }
 @media (max-width: 900px) {
     .connection-grid, .schedule-form { grid-template-columns: 1fr; }
 }
+
+.button-link.disabled { opacity: .45; pointer-events: none; }
