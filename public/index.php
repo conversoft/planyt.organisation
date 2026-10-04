@@ -291,7 +291,7 @@ function h(string $value): string
                             <form method="post" action="/actions/email-state.php">
                                 <input type="hidden" name="email_id" value="<?= h((string) $item['id']) ?>">
                                 <input type="hidden" name="state" value="hidden">
-                                <input type="hidden" name="action_token" value="<?= h($actions->issue('email-state', (string) $item['id'])) ?>">
+                                <input type="hidden" name="action_token" value="<?= h($localActions->issue('email-state', $userId, (string) $item['id'], 'hidden')) ?>">
                                 <button class="secondary" type="submit">Ausblenden</button>
                             </form>
                             <form method="post">
