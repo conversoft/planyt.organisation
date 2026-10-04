@@ -20,10 +20,10 @@ final class IntegrationFactory
 {
     private CurlHttpClient $http;
     private EncryptedTokenStore $tokens;
-    private GoogleOAuthClient $googleOAuth;
-    private GoogleConnection $googleConnection;
-    private TrelloOAuthClient $trelloOAuth;
-    private TrelloConnection $trelloConnection;
+    private ?GoogleOAuthClient $googleOAuth = null;
+    private ?GoogleConnection $googleConnection = null;
+    private ?TrelloOAuthClient $trelloOAuth = null;
+    private ?TrelloConnection $trelloConnection = null;
 
     public function __construct(private readonly string $root)
     {
@@ -32,62 +32,64 @@ final class IntegrationFactory
             $this->root . '/storage',
             Env::require('APP_KEY'),
         );
+    }
 
-        $this->googleOAuth = new GoogleOAuthClient(
+    public function googleOAuth(): GoogleOAuthClient
+    {
+        return $this->googleOAuth ??= new GoogleOAuthClient(
             $this->http,
             Env::require('GOOGLE_CLIENT_ID'),
             Env::require('GOOGLE_CLIENT_SECRET'),
             Env::require('GOOGLE_REDIRECT_URI'),
         );
-        $this->googleConnection = new GoogleConnection($this->http, $this->googleOAuth, $this->tokens);
+    }
 
-        $this->trelloOAuth = new TrelloOAuthClient(
+    public function googleConnection(): GoogleConnection
+    {
+        return $this->googleConnection ??= new GoogleConnection(
+            $this->http,
+            $this->googleOAuth(),
+            $this->tokens,
+        );
+    }
+
+    public function gmail(): GmailSource
+    {
+        return new GmailSource($this->http, $this->googleConnection());
+    }
+
+    public function calendar(): CalendarClient
+    {
+        return new CalendarClient($this->http, $this->googleConnection());
+    }
+
+    public function drive(): DriveSource
+    {
+        return new DriveSource($this->http, $this->googleConnection());
+    }
+
+    public function trelloOAuth(): TrelloOAuthClient
+    {
+        return $this->trelloOAuth ??= new TrelloOAuthClient(
             $this->http,
             Env::require('TRELLO_CLIENT_ID'),
             Env::require('TRELLO_CLIENT_SECRET'),
             Env::require('TRELLO_REDIRECT_URI'),
         );
-        $this->trelloConnection = new TrelloConnection($this->http, $this->trelloOAuth, $this->tokens);
-    }
-
-    public function googleOAuth(): GoogleOAuthClient
-    {
-        return $this->googleOAuth;
-    }
-
-    public function googleConnection(): GoogleConnection
-    {
-        return $this->googleConnection;
-    }
-
-    public function gmail(): GmailSource
-    {
-        return new GmailSource($this->http, $this->googleConnection);
-    }
-
-    public function calendar(): CalendarClient
-    {
-        return new CalendarClient($this->http, $this->googleConnection);
-    }
-
-    public function drive(): DriveSource
-    {
-        return new DriveSource($this->http, $this->googleConnection);
-    }
-
-    public function trelloOAuth(): TrelloOAuthClient
-    {
-        return $this->trelloOAuth;
     }
 
     public function trelloConnection(): TrelloConnection
     {
-        return $this->trelloConnection;
+        return $this->trelloConnection ??= new TrelloConnection(
+            $this->http,
+            $this->trelloOAuth(),
+            $this->tokens,
+        );
     }
 
     public function trello(): TrelloSource
     {
-        return new TrelloSource($this->http, $this->trelloConnection);
+        return new TrelloSource($this->http, $this->trelloConnection());
     }
 
     public function tokenStore(): EncryptedTokenStore
