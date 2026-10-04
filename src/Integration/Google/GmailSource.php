@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Planyt\Organisation\Integration\Google;
 
+use DateTimeInterface;
 use Planyt\Organisation\Http\HttpClientInterface;
 
 final class GmailSource
@@ -12,6 +13,79 @@ final class GmailSource
         private readonly HttpClientInterface $http,
         private readonly GoogleConnection $connection,
     ) {
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function sentBetween(
+        string $userId,
+        string $accountId,
+        DateTimeInterface $from,
+        DateTimeInterface $to,
+    ): array {
+        $accessToken = $this->connection->accessToken($userId, $accountId);
+        $headers = ['Authorization' => 'Bearer ' . $accessToken];
+        $query = sprintf(
+            'in:sent after:%s before:%s',
+            $from->format('Y/m/d'),
+            $to->format('Y/m/d'),
+        );
+        $messageRefs = [];
+        $pageToken = null;
+
+        do {
+            $params = ['q' => $query, 'maxResults' => 100];
+
+            if ($pageToken !== null) {
+                $params['pageToken'] = $pageToken;
+            }
+
+            $page = $this->http->get(
+                'https://gmail.googleapis.com/gmail/v1/users/me/messages',
+                $headers,
+                $params,
+            );
+
+            foreach ($page['messages'] ?? [] as $messageRef) {
+                if (is_array($messageRef) && isset($messageRef['id'])) {
+                    $messageRefs[] = $messageRef;
+                }
+            }
+
+            $pageToken = isset($page['nextPageToken']) ? (string) $page['nextPageToken'] : null;
+        } while ($pageToken !== null && $pageToken !== '');
+
+        $items = [];
+
+        foreach ($messageRefs as $messageRef) {
+            $message = $this->http->get(
+                'https://gmail.googleapis.com/gmail/v1/users/me/messages/' . rawurlencode((string) $messageRef['id']),
+                $headers,
+                ['format' => 'metadata'],
+            );
+            $headersMap = $this->headers($message['payload']['headers'] ?? []);
+            $threadId = (string) ($message['threadId'] ?? '');
+
+            $items[] = [
+                'id' => 'gmail-sent:' . $accountId . ':' . (string) ($message['id'] ?? ''),
+                'account' => $accountId,
+                'thread_id' => $threadId,
+                'title' => $headersMap['subject'] ?? '(ohne Betreff)',
+                'to' => $headersMap['to'] ?? '',
+                'date' => $headersMap['date'] ?? '',
+                'internal_date' => (int) ($message['internalDate'] ?? 0),
+                'message_id' => $headersMap['message-id'] ?? '',
+                'url' => $threadId !== ''
+                    ? 'https://mail.google.com/mail/u/0/#all/' . rawurlencode($threadId)
+                    : '',
+            ];
+        }
+
+        usort(
+            $items,
+            static fn (array $a, array $b): int => ($b['internal_date'] ?? 0) <=> ($a['internal_date'] ?? 0),
+        );
+
+        return $items;
     }
 
     /** @return array<int, array<string, mixed>> */
