@@ -30,6 +30,7 @@ if ($command === 'help') {
     output('  planyt doctor              Check the local runtime');
     output('  planyt google:configure    Configure Google once for this installation');
     output('  planyt trello:configure    Configure Trello once for this installation');
+    output('  planyt proad:configure     Configure PROAD once for this installation');
     exit(0);
 }
 
@@ -80,6 +81,28 @@ if ($command === 'google:configure') {
     ]);
 
     output('Google ist fuer diese Installation freigeschaltet.');
+    exit(0);
+}
+
+if ($command === 'proad:configure') {
+    if (!class_exists(\Planyt\Organisation\Config\InstallationConfig::class)) {
+        fwrite(STDERR, 'Run composer install first.' . PHP_EOL);
+        exit(1);
+    }
+
+    fwrite(STDOUT, 'PROAD Basis-URL: ');
+    $baseUrl = trim((string) fgets(STDIN));
+
+    if ($baseUrl === '') {
+        fwrite(STDERR, 'Die PROAD Basis-URL wird benoetigt.' . PHP_EOL);
+        exit(1);
+    }
+
+    (new \Planyt\Organisation\Config\InstallationConfig($root . '/storage'))->saveProad([
+        'base_url' => $baseUrl,
+    ]);
+
+    output('PROAD ist fuer diese Installation freigeschaltet.');
     exit(0);
 }
 
