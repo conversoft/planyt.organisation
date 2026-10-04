@@ -16,6 +16,7 @@ DotEnv::load($root . '/.env');
 
 $userId = Env::get('PLANYT_USER_ID', 'demo') ?? 'demo';
 $compiler = new PromptCompiler();
+$preferences = (new UserPreferencesRepository($root . '/storage'))->load($userId);
 $prompt = null;
 $error = $_GET['integration_error'] ?? null;
 $factory = null;
@@ -144,7 +145,32 @@ function h(string $value): string
                     <strong>Trello</strong>
                     <p>Boards, Listen und zugewiesene Karten ausschließlich lesen</p>
                     <?php foreach ($trelloAccounts as $account): ?>
+                        <?php
+                        $accountId = (string) ($account['account_id'] ?? '');
+                        $boards = $data['boards'][$accountId] ?? [];
+                        $hasSelection = array_key_exists($accountId, $preferences['trello_boards'] ?? []);
+                        $selectedBoards = $hasSelection ? ($preferences['trello_boards'][$accountId] ?? []) : null;
+                        ?>
                         <div class="account-pill"><?= h((string) ($account['full_name'] ?? $account['username'] ?? 'Trello')) ?></div>
+                        <?php if ($boards !== []): ?>
+                            <form method="post" action="/actions/boards.php" class="board-form">
+                                <input type="hidden" name="account_id" value="<?= h($accountId) ?>">
+                                <p class="small-label">Boards für deine Übersicht</p>
+                                <?php foreach ($boards as $board): ?>
+                                    <?php
+                                    $boardId = (string) ($board['id'] ?? '');
+                                    $checked = $selectedBoards === null || in_array($boardId, $selectedBoards, true);
+                                    ?>
+                                    <label class="check-row">
+                                        <input type="checkbox" name="boards[]" value="<?= h($boardId) ?>" <?= $checked ? 'checked' : '' ?>>
+                                        <span><?= h((string) ($board['name'] ?? 'Board')) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                                <button class="secondary" type="submit">Board-Auswahl speichern</button>
+                            </form>
+                        <?php else: ?>
+                            <p class="muted">Nach dem ersten Sync kannst du hier Boards auswählen.</p>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                     <?php if ($factory?->trelloConfigured()): ?>
                         <a class="button-link" href="/oauth/trello/start.php">Trello verbinden</a>
