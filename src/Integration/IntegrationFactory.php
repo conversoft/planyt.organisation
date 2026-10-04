@@ -10,7 +10,6 @@ use Planyt\Organisation\Integration\Google\CalendarClient;
 use Planyt\Organisation\Integration\Google\DriveSource;
 use Planyt\Organisation\Integration\Google\GmailSource;
 use Planyt\Organisation\Integration\Google\GoogleConnection;
-use Planyt\Organisation\Integration\Google\GoogleOAuthClient;
 use Planyt\Organisation\Integration\Trello\TrelloConnection;
 use Planyt\Organisation\Integration\Trello\TrelloOAuthClient;
 use Planyt\Organisation\Integration\Trello\TrelloSource;
@@ -20,7 +19,6 @@ final class IntegrationFactory
 {
     private CurlHttpClient $http;
     private EncryptedTokenStore $tokens;
-    private ?GoogleOAuthClient $googleOAuth = null;
     private ?GoogleConnection $googleConnection = null;
     private ?TrelloOAuthClient $trelloOAuth = null;
     private ?TrelloConnection $trelloConnection = null;
@@ -34,11 +32,9 @@ final class IntegrationFactory
         );
     }
 
-    public function googleConfigured(): bool
+    public function googleAvailable(string $userId): bool
     {
-        return Env::get('GOOGLE_CLIENT_ID') !== null
-            && Env::get('GOOGLE_CLIENT_SECRET') !== null
-            && Env::get('GOOGLE_REDIRECT_URI') !== null;
+        return $this->googleConnection()->accounts($userId) !== [];
     }
 
     public function trelloConfigured(): bool
@@ -48,21 +44,10 @@ final class IntegrationFactory
             && Env::get('TRELLO_REDIRECT_URI') !== null;
     }
 
-    public function googleOAuth(): GoogleOAuthClient
-    {
-        return $this->googleOAuth ??= new GoogleOAuthClient(
-            $this->http,
-            Env::require('GOOGLE_CLIENT_ID'),
-            Env::require('GOOGLE_CLIENT_SECRET'),
-            Env::require('GOOGLE_REDIRECT_URI'),
-        );
-    }
-
     public function googleConnection(): GoogleConnection
     {
         return $this->googleConnection ??= new GoogleConnection(
             $this->http,
-            $this->googleOAuth(),
             $this->tokens,
         );
     }
