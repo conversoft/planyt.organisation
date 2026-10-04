@@ -33,4 +33,6 @@
 - Added one-time administrator Trello configuration via `php bin/planyt trello:configure`.
 - Simplified employee-facing connection language to Google login status and a single Trello Connect action.
 
+- Added an administrator-facing step-by-step Google OAuth setup guide and linked it from the README.
+
 Author: OpenAI GPT-5.6 Sol
