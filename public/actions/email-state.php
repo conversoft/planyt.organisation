@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 use Planyt\Organisation\Auth\CurrentUser;
+use Planyt\Organisation\Config\InstallationConfig;
+use Planyt\Organisation\Security\LocalActionToken;
 use Planyt\Organisation\Storage\UserPreferencesRepository;
 use Planyt\Organisation\Storage\UserStateRepository;
-use Planyt\Organisation\Workflow\UserActionSession;
 
 $root = dirname(__DIR__, 2);
 require $root . '/vendor/autoload.php';
@@ -23,9 +24,9 @@ try {
         throw new RuntimeException('Invalid email state.');
     }
 
-    (new UserActionSession())->consume($token, 'email-state', $emailId);
-
     $userId = CurrentUser::id();
+    (new LocalActionToken((new InstallationConfig($root . '/storage'))->appKey()))
+        ->verify($token, 'email-state', $userId, $emailId, $state);
     $repository = new UserPreferencesRepository($root . '/storage');
     $preferences = $repository->load($userId);
     $preferences['email_states'] ??= [];
