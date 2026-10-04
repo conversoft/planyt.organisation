@@ -139,3 +139,30 @@ footer { color: var(--muted); font-size: 12px; padding: 24px 4px 8px; }
 .task-title-link:hover { text-decoration-thickness: 2px; }
 
 .board-form input[type="password"] { width: 100%; margin: 6px 0 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 9px; color: var(--ink); }
+
+
+.connections-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    list-style: none;
+}
+.connections-summary::-webkit-details-marker { display: none; }
+.connections-summary::after {
+    content: "▾";
+    font-size: 14px;
+    color: var(--muted);
+    transition: transform .15s ease;
+}
+.connections[open] .connections-summary::after { transform: rotate(180deg); }
+.connections-summary small {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+}
+.connections:not([open]) .connection-grid { display: none; }
+.connections[open] .connection-grid { margin-top: 16px; }
