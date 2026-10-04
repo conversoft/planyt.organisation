@@ -135,8 +135,11 @@ function h(string $value): string
                     <?php endforeach; ?>
                     <?php if ($googleAccounts !== []): ?>
                         <span class="status-ok">✓ Angemeldet</span>
+                    <?php elseif ($factory?->googleConfigured()): ?>
+                        <a class="button-link" href="/oauth/google/start.php">Mit Google anmelden</a>
                     <?php else: ?>
-                        <span class="muted">Bitte mit Google anmelden.</span>
+                        <a class="button-link disabled" href="#" aria-disabled="true">Mit Google anmelden</a>
+                        <span class="muted">Google ist für diese Installation noch nicht freigeschaltet.</span>
                     <?php endif; ?>
                 </div>
                 <div class="connection-card">
