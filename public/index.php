@@ -5,7 +5,9 @@ declare(strict_types=1);
 use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Auth\ExistingGoogleLogin;
 use Planyt\Organisation\Integration\IntegrationFactory;
+use Planyt\Organisation\Config\InstallationConfig;
 use Planyt\Organisation\PromptCompiler\PromptCompiler;
+use Planyt\Organisation\Security\LocalActionToken;
 use Planyt\Organisation\Storage\JsonDashboardRepository;
 use Planyt\Organisation\Storage\UserStateRepository;
 use Planyt\Organisation\Storage\UserPreferencesRepository;
@@ -16,6 +18,7 @@ require $root . '/vendor/autoload.php';
 $userId = CurrentUser::id();
 $compiler = new PromptCompiler();
 $preferences = (new UserPreferencesRepository($root . '/storage'))->load($userId);
+$localActions = new LocalActionToken((new InstallationConfig($root . '/storage'))->appKey());
 $prompt = null;
 $error = $_GET['integration_error'] ?? null;
 $factory = null;
@@ -32,6 +35,17 @@ if ($liveMode) {
             ? $factory->trelloConnection()->accounts($userId)
             : [];
         $data = (new UserStateRepository($root . '/storage'))->load($userId);
+
+        $taskStates = is_array($preferences['task_states'] ?? null) ? $preferences['task_states'] : [];
+        $data['unscheduled'] = array_values(array_filter(
+            $data['unscheduled'] ?? [],
+            static function (array $item) use ($taskStates): bool {
+                $sourceId = (string) ($item['source_id'] ?? '');
+
+                return $sourceId !== ''
+                    && !in_array((string) ($taskStates[$sourceId] ?? ''), ['done', 'irrelevant'], true);
+            },
+        ));
     } catch (Throwable $exception) {
         $error = $exception->getMessage();
         $data = (new JsonDashboardRepository())->load($root . '/resources/demo/dashboard.json');
@@ -243,13 +257,13 @@ function h(string $value): string
                             <form method="post" action="/actions/task-state.php">
                                 <input type="hidden" name="source_id" value="<?= h((string) $item['source_id']) ?>">
                                 <input type="hidden" name="state" value="done">
-                                <input type="hidden" name="action_token" value="<?= h($actions->issue('task-state', (string) $item['source_id'])) ?>">
+                                <input type="hidden" name="action_token" value="<?= h($localActions->issue('task-state', $userId, (string) $item['source_id'], 'done')) ?>">
                                 <button class="secondary" type="submit">Intern erledigt</button>
                             </form>
                             <form method="post" action="/actions/task-state.php">
                                 <input type="hidden" name="source_id" value="<?= h((string) $item['source_id']) ?>">
                                 <input type="hidden" name="state" value="irrelevant">
-                                <input type="hidden" name="action_token" value="<?= h($actions->issue('task-state', (string) $item['source_id'])) ?>">
+                                <input type="hidden" name="action_token" value="<?= h($localActions->issue('task-state', $userId, (string) $item['source_id'], 'irrelevant')) ?>">
                                 <button class="secondary" type="submit">Irrelevant</button>
                             </form>
                             <form method="post" class="prompt-action">
