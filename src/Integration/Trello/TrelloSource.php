@@ -28,13 +28,13 @@ final class TrelloSource
     }
 
     /** @param array<int, string> $boardIds @return array<int, array<string, mixed>> */
-    public function pull(string $userId, string $accountId, array $boardIds = []): array
+    public function pull(string $userId, string $accountId, ?array $boardIds = null): array
     {
         $token = $this->connection->accessToken($userId, $accountId);
         $headers = ['Authorization' => 'Bearer ' . $token];
         $boards = $this->boards($userId, $accountId);
 
-        if ($boardIds !== []) {
+        if ($boardIds !== null) {
             $boards = array_values(array_filter(
                 $boards,
                 static fn (array $board): bool => in_array((string) ($board['id'] ?? ''), $boardIds, true),
