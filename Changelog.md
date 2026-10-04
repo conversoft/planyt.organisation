@@ -40,4 +40,6 @@
 
 - Fixed PHP 8.5 deprecation warnings by removing the no-op `curl_close()` call from the HTTP client.
 
+- Added per-user local task states: `done` and `irrelevant`. These states only affect Planyt and never write to or mutate Trello.
+
 Author: OpenAI GPT-5.6 Sol
