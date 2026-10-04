@@ -2,38 +2,33 @@
 
 declare(strict_types=1);
 
-use Planyt\Organisation\Config\DotEnv;
-use Planyt\Organisation\Config\Env;
+use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\OAuth\OAuthSession;
 
 $root = dirname(__DIR__, 3);
 require $root . '/vendor/autoload.php';
-DotEnv::load($root . '/.env');
 
 try {
     $state = (string) ($_GET['state'] ?? '');
     $code = (string) ($_GET['code'] ?? '');
 
     if ($state === '' || $code === '') {
-        throw new RuntimeException('Trello callback is missing state or code.');
+        throw new RuntimeException('Trello-Anmeldung konnte nicht abgeschlossen werden.');
     }
 
     $payload = (new OAuthSession())->consume('trello', $state);
     $verifier = (string) ($payload['code_verifier'] ?? '');
 
     if ($verifier === '') {
-        throw new RuntimeException('Trello PKCE verifier is missing.');
+        throw new RuntimeException('Trello-Anmeldung ist abgelaufen. Bitte erneut versuchen.');
     }
 
     $factory = new IntegrationFactory($root);
     $token = $factory->trelloOAuth()->exchangeCode($code, $verifier);
-    $factory->trelloConnection()->storeNew(
-        Env::get('PLANYT_USER_ID', 'demo') ?? 'demo',
-        $token,
-    );
+    $factory->trelloConnection()->storeNew(CurrentUser::id(), $token);
 
-    header('Location: /?connected=trello', true, 302);
+    header('Location: /?connected=trello#connections', true, 302);
 } catch (Throwable $exception) {
     header('Location: /?integration_error=' . rawurlencode($exception->getMessage()), true, 302);
 }
