@@ -31,7 +31,7 @@ final class GmailSource
             $thread = $this->http->get(
                 'https://gmail.googleapis.com/gmail/v1/users/me/threads/' . rawurlencode((string) $threadRef['id']),
                 $headers,
-                ['format' => 'metadata', 'metadataHeaders' => 'From,Subject,Date'],
+                ['format' => 'metadata'],
             );
             $messages = $thread['messages'] ?? [];
 
