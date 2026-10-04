@@ -87,6 +87,14 @@ function h(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
+
+function compactMailBody(string $value): string
+{
+    $normalized = str_replace(["\r\n", "\r"], "\n", $value);
+    $normalized = preg_replace("/\n[\t ]*\n(?:[\t ]*\n)+/", "\n\n", $normalized);
+
+    return $normalized ?? $value;
+}
 ?>
 <!doctype html>
 <html lang="de">
@@ -315,7 +323,7 @@ function h(string $value): string
                         <div class="source gmail">Gmail · <?= h((string) ($item['account'] ?? '')) ?></div>
                         <strong><?= h((string) $item['title']) ?></strong>
                         <p>Von <?= h((string) ($item['from'] ?? '')) ?></p>
-                        <div class="mail-body"><?= nl2br(h((string) ($item['body'] ?? ''))) ?></div>
+                        <div class="mail-body"><?= nl2br(h(compactMailBody((string) ($item['body'] ?? '')))) ?></div>
                         <div class="task-actions">
                             <form method="post" action="/actions/email-state.php">
                                 <input type="hidden" name="email_id" value="<?= h((string) $item['id']) ?>">
