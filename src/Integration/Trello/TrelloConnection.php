@@ -68,6 +68,7 @@ final class TrelloConnection
 
         $refreshed = $this->oauth->refresh($refreshToken);
         $token = array_merge($token, $refreshed);
+        $token['refresh_token'] = (string) ($refreshed['refresh_token'] ?? $refreshToken);
         $token['expires_at'] = time() + (int) ($refreshed['expires_in'] ?? 3600);
 
         $this->tokens->save($userId, 'trello', $accountId, $token);
