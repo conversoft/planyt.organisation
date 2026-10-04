@@ -323,7 +323,10 @@ function compactMailBody(string $value): string
                         <div class="source gmail">Gmail · <?= h((string) ($item['account'] ?? '')) ?></div>
                         <strong><?= h((string) $item['title']) ?></strong>
                         <p>Von <?= h((string) ($item['from'] ?? '')) ?></p>
-                        <div class="mail-body"><?= h(compactMailBody((string) ($item['body'] ?? ''))) ?></div>
+                        <div class="mail-body-wrapper">
+                            <div class="mail-body" data-mail-body><?= h(compactMailBody((string) ($item['body'] ?? ''))) ?></div>
+                            <button class="mail-more" type="button" data-mail-more hidden>Mehr anzeigen</button>
+                        </div>
                         <?php
                         $mailUrl = (string) ($item['url'] ?? '');
                         if ($mailUrl === '' && ($item['thread_id'] ?? '') !== '') {
