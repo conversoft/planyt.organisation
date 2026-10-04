@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\OAuth\OAuthSession;
 
@@ -19,14 +18,15 @@ try {
 
     $payload = (new OAuthSession())->consume('trello', $state);
     $verifier = (string) ($payload['code_verifier'] ?? '');
+    $userId = (string) ($payload['user_id'] ?? '');
 
-    if ($verifier === '') {
+    if ($verifier === '' || $userId === '') {
         throw new RuntimeException('Trello-Anmeldung ist abgelaufen. Bitte erneut versuchen.');
     }
 
     $factory = new IntegrationFactory($root);
     $token = $factory->trelloOAuth()->exchangeCode($code, $verifier);
-    $factory->trelloConnection()->storeNew(CurrentUser::id(), $token);
+    $factory->trelloConnection()->storeNew($userId, $token);
 
     header('Location: /?connected=trello#connections', true, 302);
 } catch (Throwable $exception) {
