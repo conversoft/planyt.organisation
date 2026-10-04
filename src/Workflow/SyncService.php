@@ -58,9 +58,7 @@ final class SyncService
         $rangeStart = $now->setTime(0, 0);
         $rangeEnd = $rangeStart->modify('+30 days');
 
-        $googleAccounts = $this->integrations->googleConfigured()
-            ? $this->integrations->googleConnection()->accounts($userId)
-            : [];
+        $googleAccounts = $this->integrations->googleConnection()->accounts($userId);
 
         foreach ($googleAccounts as $account) {
             $accountId = (string) ($account['account_id'] ?? '');
