@@ -128,7 +128,7 @@ h3 { font-size: 18px; margin-bottom: 0; }
 .mail-more:hover {
     background: transparent;
 }
-.mail-card { min-width: 0; overflow: hidden; }
+.mail-card { min-width: 0; overflow: visible; display: flex; flex-direction: column; }
 .mail-card strong,
 .mail-card p,
 .mail-card .mail-body { overflow-wrap: anywhere; }
@@ -215,3 +215,13 @@ footer { color: var(--muted); font-size: 12px; padding: 24px 4px 8px; }
 
 .secondary-link { background: transparent; color: var(--ink); border: 1px solid var(--line); margin-top: 0; }
 .secondary-link:hover { background: #f8f9f6; }
+
+
+.mail-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    margin-top: 10px;
+    padding: 10px 0 2px;
+    background: var(--surface);
+}
