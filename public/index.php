@@ -315,7 +315,7 @@ function h(string $value): string
                         <div class="source gmail">Gmail · <?= h((string) ($item['account'] ?? '')) ?></div>
                         <strong><?= h((string) $item['title']) ?></strong>
                         <p>Von <?= h((string) ($item['from'] ?? '')) ?></p>
-                        <blockquote><?= h((string) ($item['body'] ?? '')) ?></blockquote>
+                        <div class="mail-body"><?= nl2br(h((string) ($item['body'] ?? ''))) ?></div>
                         <div class="task-actions">
                             <form method="post" action="/actions/email-state.php">
                                 <input type="hidden" name="email_id" value="<?= h((string) $item['id']) ?>">
