@@ -72,4 +72,6 @@
 
 - Email previews now collapse repeated blank lines to a single blank line while preserving normal paragraph breaks.
 
+- Added an `E-Mail öffnen` action to Gmail attention cards using the exact Gmail thread link for the connected account. Spark-specific deep links remain unavailable because Spark generates them internally.
+
 Author: OpenAI GPT-5.6 Sol
