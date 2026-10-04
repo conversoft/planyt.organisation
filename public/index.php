@@ -336,7 +336,7 @@ function compactMailBody(string $value): string
                                 . rawurlencode((string) $item['thread_id']);
                         }
                         ?>
-                        <div class="task-actions">
+                        <div class="task-actions mail-actions">
                             <?php if ($mailUrl !== ''): ?>
                                 <a class="button-link secondary-link" href="<?= h($mailUrl) ?>" target="_blank" rel="noopener noreferrer">E-Mail öffnen</a>
                             <?php endif; ?>
