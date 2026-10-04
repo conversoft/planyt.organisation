@@ -14,6 +14,7 @@ use Planyt\Organisation\Integration\Google\GoogleOAuthClient;
 use Planyt\Organisation\Integration\Trello\TrelloConnection;
 use Planyt\Organisation\Integration\Trello\TrelloOAuthClient;
 use Planyt\Organisation\Integration\Trello\TrelloSource;
+use Planyt\Organisation\Integration\Proad\ProadConnection;
 use Planyt\Organisation\Security\EncryptedTokenStore;
 
 final class IntegrationFactory
@@ -25,6 +26,7 @@ final class IntegrationFactory
     private ?GoogleConnection $googleConnection = null;
     private ?TrelloOAuthClient $trelloOAuth = null;
     private ?TrelloConnection $trelloConnection = null;
+    private ?ProadConnection $proadConnection = null;
 
     public function __construct(private readonly string $root)
     {
@@ -44,6 +46,11 @@ final class IntegrationFactory
     public function googleAvailable(string $userId): bool
     {
         return $this->googleConnection()->accounts($userId) !== [];
+    }
+
+    public function proadConfigured(): bool
+    {
+        return $this->installation->proad() !== null;
     }
 
     public function trelloConfigured(): bool
@@ -89,6 +96,20 @@ final class IntegrationFactory
     public function drive(): DriveSource
     {
         return new DriveSource($this->http, $this->googleConnection());
+    }
+
+    public function proadConnection(): ProadConnection
+    {
+        $config = $this->installation->proad();
+
+        if ($config === null) {
+            throw new \RuntimeException('PROAD is not enabled for this installation.');
+        }
+
+        return $this->proadConnection ??= new ProadConnection(
+            $this->tokens,
+            $config['base_url'],
+        );
     }
 
     public function trelloOAuth(): TrelloOAuthClient
