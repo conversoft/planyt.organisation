@@ -34,6 +34,20 @@ final class IntegrationFactory
         );
     }
 
+    public function googleConfigured(): bool
+    {
+        return Env::get('GOOGLE_CLIENT_ID') !== null
+            && Env::get('GOOGLE_CLIENT_SECRET') !== null
+            && Env::get('GOOGLE_REDIRECT_URI') !== null;
+    }
+
+    public function trelloConfigured(): bool
+    {
+        return Env::get('TRELLO_CLIENT_ID') !== null
+            && Env::get('TRELLO_CLIENT_SECRET') !== null
+            && Env::get('TRELLO_REDIRECT_URI') !== null;
+    }
+
     public function googleOAuth(): GoogleOAuthClient
     {
         return $this->googleOAuth ??= new GoogleOAuthClient(
