@@ -147,8 +147,11 @@ function h(string $value): string
             <?php endif; ?>
         </section>
 
-        <section class="panel connections" id="connections">
-            <div class="panel-title"><h3>Verbindungen</h3><span>pro Nutzer separat</span></div>
+        <details class="panel connections" id="connections">
+            <summary class="connections-summary">
+                <span>Verbindungen</span>
+                <small>pro Nutzer separat</small>
+            </summary>
             <div class="connection-grid">
                 <div class="connection-card">
                     <strong>Google</strong>
@@ -221,7 +224,7 @@ function h(string $value): string
                     <?php endif; ?>
                 </div>
             </div>
-        </section>
+        </details>
 
         <section class="grid">
             <div class="panel">
