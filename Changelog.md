@@ -23,4 +23,7 @@
 
 - Fixed missing `UserPreferencesRepository` import in the live dashboard.
 
+- Added explicit Google and Trello Connect buttons.
+- Unified Google and Trello OAuth storage into per-user `tokens.json`, with encrypted provider payloads and legacy token migration.
+
 Author: OpenAI GPT-5.6 Sol
