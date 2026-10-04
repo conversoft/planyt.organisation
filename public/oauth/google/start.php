@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\OAuth\OAuthSession;
 
@@ -17,6 +18,7 @@ try {
 
     $state = (new OAuthSession())->begin('google', [
         'started_at' => time(),
+        'user_id' => CurrentUser::id(),
     ]);
 
     header('Location: ' . $factory->googleOAuth()->authorizationUrl($state), true, 302);
