@@ -21,4 +21,6 @@
 - Added live dashboard connection and scheduling controls.
 - Added integration scope, PKCE and encrypted-token safety tests.
 
+- Fixed missing `UserPreferencesRepository` import in the live dashboard.
+
 Author: OpenAI GPT-5.6 Sol
