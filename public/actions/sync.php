@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use Planyt\Organisation\Config\DotEnv;
-use Planyt\Organisation\Config\Env;
+use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\Storage\UserPreferencesRepository;
 use Planyt\Organisation\Storage\UserStateRepository;
@@ -11,14 +10,13 @@ use Planyt\Organisation\Workflow\SyncService;
 
 $root = dirname(__DIR__, 2);
 require $root . '/vendor/autoload.php';
-DotEnv::load($root . '/.env');
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new RuntimeException('Sync requires POST.');
     }
 
-    $userId = Env::get('PLANYT_USER_ID', 'demo') ?? 'demo';
+    $userId = CurrentUser::id();
     $sync = new SyncService(
         new IntegrationFactory($root),
         new UserStateRepository($root . '/storage'),
