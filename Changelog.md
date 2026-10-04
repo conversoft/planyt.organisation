@@ -35,4 +35,7 @@
 
 - Added an administrator-facing step-by-step Google OAuth setup guide and linked it from the README.
 
+- Added a step-by-step Trello OAuth admin setup guide and linked it from the README.
+- Bound Trello OAuth state to the initiating user and preserved rotated refresh tokens.
+
 Author: OpenAI GPT-5.6 Sol
