@@ -50,4 +50,6 @@
 
 - Reduced the desktop content width, gave the Today/Planning area a calmer fixed-proportion layout, and placed local task actions side by side for a more compact scan-friendly dashboard.
 
+- Tuned the desktop UI for comfortable use at 100% browser zoom: narrower content column, slightly larger typography, more compact connection proportions, and tighter planning cards/forms.
+
 Author: OpenAI GPT-5.6 Sol
