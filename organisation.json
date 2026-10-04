@@ -14,10 +14,38 @@
     "javascript": "native-first"
   },
   "integrations": {
-    "trello": {"mode": "read-only"},
-    "gmail": {"mode": "read-only", "outboundCommunication": false},
-    "googleDrive": {"mode": "read-only"},
-    "googleCalendar": {"mode": "read-write", "requiresExplicitUserAction": true}
+    "trello": {
+      "mode": "read-only",
+      "auth": "oauth2-confidential-pkce",
+      "scopes": [
+        "read:member:trello",
+        "read:board:trello",
+        "offline_access"
+      ]
+    },
+    "gmail": {
+      "mode": "read-only",
+      "auth": "google-oauth2",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.readonly"
+      ],
+      "outboundCommunication": false
+    },
+    "googleDrive": {
+      "mode": "read-only",
+      "auth": "google-oauth2",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive.readonly"
+      ]
+    },
+    "googleCalendar": {
+      "mode": "read-write-owned",
+      "auth": "google-oauth2",
+      "scopes": [
+        "https://www.googleapis.com/auth/calendar.events.owned"
+      ],
+      "requiresExplicitUserAction": true
+    }
   },
   "promptCompiler": {
     "externalAiApi": false,
@@ -27,5 +55,10 @@
   "update": {
     "branch": "main",
     "strategy": "fast-forward-only"
+  },
+  "storage": {
+    "tokens": "libsodium-encrypted-files",
+    "userState": "json",
+    "technicalMetadata": "sqlite-optional"
   }
 }
