@@ -1,0 +1,91 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$command = $argv[1] ?? 'help';
+
+function run(string $command, string $cwd): int
+{
+    passthru('cd ' . escapeshellarg($cwd) . ' && ' . $command, $exitCode);
+
+    return $exitCode;
+}
+
+function output(string $message): void
+{
+    fwrite(STDOUT, $message . PHP_EOL);
+}
+
+if ($command === 'help') {
+    output('Planyt Organisation CLI');
+    output('');
+    output('Commands:');
+    output('  planyt update   Safely fast-forward this installation to origin/main');
+    output('  planyt doctor   Check the local runtime');
+    exit(0);
+}
+
+if ($command === 'doctor') {
+    output('PHP: ' . PHP_VERSION);
+    output('Repository: ' . $root);
+    output('Storage writable: ' . (is_writable($root . '/storage') ? 'yes' : 'no'));
+    exit(PHP_VERSION_ID >= 80400 ? 0 : 1);
+}
+
+if ($command !== 'update') {
+    fwrite(STDERR, 'Unknown command: ' . $command . PHP_EOL);
+    exit(2);
+}
+
+exec('cd ' . escapeshellarg($root) . ' && git status --porcelain', $changes, $statusCode);
+
+if ($statusCode !== 0) {
+    fwrite(STDERR, 'Cannot read Git status.' . PHP_EOL);
+    exit(1);
+}
+
+if ($changes !== []) {
+    fwrite(STDERR, 'Update refused: local source changes exist. Commit or remove them first.' . PHP_EOL);
+    exit(1);
+}
+
+exec('cd ' . escapeshellarg($root) . ' && git branch --show-current', $branchOutput, $branchCode);
+$branch = trim(implode('', $branchOutput));
+
+if ($branchCode !== 0 || $branch !== 'main') {
+    fwrite(STDERR, 'Update refused: this installation must be on main.' . PHP_EOL);
+    exit(1);
+}
+
+output('Fetching origin/main ...');
+
+if (run('git fetch origin main', $root) !== 0) {
+    exit(1);
+}
+
+exec('cd ' . escapeshellarg($root) . ' && git merge-base HEAD origin/main', $mergeBaseOutput, $mergeBaseCode);
+$mergeBase = trim(implode('', $mergeBaseOutput));
+
+exec('cd ' . escapeshellarg($root) . ' && git rev-parse HEAD', $headOutput, $headCode);
+$head = trim(implode('', $headOutput));
+
+if ($mergeBaseCode !== 0 || $headCode !== 0 || $mergeBase !== $head) {
+    fwrite(STDERR, 'Update refused: local main has commits not contained in origin/main.' . PHP_EOL);
+    exit(1);
+}
+
+if (run('git pull --ff-only origin main', $root) !== 0) {
+    exit(1);
+}
+
+if (is_file($root . '/composer.json')) {
+    output('Installing production dependencies ...');
+
+    if (run('composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction', $root) !== 0) {
+        exit(1);
+    }
+}
+
+output('Planyt Organisation is up to date.');
