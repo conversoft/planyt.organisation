@@ -31,7 +31,7 @@ final class GmailSource
             $thread = $this->http->get(
                 'https://gmail.googleapis.com/gmail/v1/users/me/threads/' . rawurlencode((string) $threadRef['id']),
                 $headers,
-                ['format' => 'metadata'],
+                ['format' => 'full'],
             );
             $messages = $thread['messages'] ?? [];
 
@@ -46,6 +46,7 @@ final class GmailSource
             $labels = $last['labelIds'] ?? [];
             $fromSelf = str_contains(strtolower($from), strtolower($accountId));
             $sentBySelf = in_array('SENT', $labels, true);
+            $body = trim($this->messageBody($last['payload'] ?? []));
 
             $items[] = [
                 'id' => 'gmail:' . $accountId . ':' . (string) $thread['id'],
@@ -55,7 +56,7 @@ final class GmailSource
                 'title' => $subject,
                 'from' => $from,
                 'received' => $headersMap['date'] ?? '',
-                'body' => (string) ($last['snippet'] ?? ''),
+                'body' => $body !== '' ? $body : (string) ($last['snippet'] ?? ''),
                 'needsReply' => !$fromSelf && !$sentBySelf,
                 'context' => 'Gmail thread ' . (string) $thread['id'],
             ];
@@ -78,5 +79,58 @@ final class GmailSource
         }
 
         return $result;
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function messageBody(array $payload): string
+    {
+        $mimeType = (string) ($payload['mimeType'] ?? '');
+        $data = (string) ($payload['body']['data'] ?? '');
+
+        if ($data !== '' && ($mimeType === 'text/plain' || $mimeType === 'text/html')) {
+            $decoded = $this->decodeBase64Url($data);
+
+            return $mimeType === 'text/html'
+                ? trim(html_entity_decode(strip_tags($decoded)))
+                : trim($decoded);
+        }
+
+        $htmlFallback = '';
+
+        foreach ($payload['parts'] ?? [] as $part) {
+            if (!is_array($part)) {
+                continue;
+            }
+
+            $partType = (string) ($part['mimeType'] ?? '');
+            $partBody = $this->messageBody($part);
+
+            if ($partBody === '') {
+                continue;
+            }
+
+            if ($partType === 'text/plain') {
+                return $partBody;
+            }
+
+            if ($htmlFallback === '') {
+                $htmlFallback = $partBody;
+            }
+        }
+
+        return $htmlFallback;
+    }
+
+    private function decodeBase64Url(string $value): string
+    {
+        $padding = strlen($value) % 4;
+
+        if ($padding !== 0) {
+            $value .= str_repeat('=', 4 - $padding);
+        }
+
+        $decoded = base64_decode(strtr($value, '-_', '+/'), true);
+
+        return $decoded === false ? '' : $decoded;
     }
 }
