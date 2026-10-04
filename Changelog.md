@@ -64,4 +64,6 @@
 
 - Converted the connections block to a collapsible `<details>`/`<summary>` section so it can be folded away when not needed.
 
+- Made the connections disclosure arrow larger, high-contrast and easier to recognize as an interactive toggle.
+
 Author: OpenAI GPT-5.6 Sol
