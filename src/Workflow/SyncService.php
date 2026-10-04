@@ -39,8 +39,12 @@ final class SyncService
                 continue;
             }
 
-            $selectedBoards = $prefs['trello_boards'][$accountId] ?? [];
-            $selectedBoards = is_array($selectedBoards) ? array_values(array_map('strval', $selectedBoards)) : [];
+            $selectedBoards = array_key_exists($accountId, $prefs['trello_boards'] ?? [])
+                ? ($prefs['trello_boards'][$accountId] ?? [])
+                : null;
+            $selectedBoards = is_array($selectedBoards)
+                ? array_values(array_map('strval', $selectedBoards))
+                : null;
 
             $boardsByAccount[$accountId] = $this->integrations->trello()->boards($userId, $accountId);
             $trelloItems = array_merge(
