@@ -8,6 +8,7 @@ use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\PromptCompiler\PromptCompiler;
 use Planyt\Organisation\Storage\JsonDashboardRepository;
 use Planyt\Organisation\Storage\UserStateRepository;
+use Planyt\Organisation\Storage\UserPreferencesRepository;
 use Planyt\Organisation\Workflow\UserActionSession;
 
 $root = dirname(__DIR__);
