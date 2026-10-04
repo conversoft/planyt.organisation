@@ -48,4 +48,6 @@
 - Fixed local Trello and Gmail status buttons by replacing brittle one-time PHP-session action tokens with stateless HMAC-signed local-action tokens.
 - The dashboard now also filters locally completed/irrelevant Trello cards on page load so they disappear immediately and remain hidden without touching Trello.
 
+- Reduced the desktop content width, gave the Today/Planning area a calmer fixed-proportion layout, and placed local task actions side by side for a more compact scan-friendly dashboard.
+
 Author: OpenAI GPT-5.6 Sol
