@@ -54,4 +54,8 @@
 
 - Added direct links from Trello task titles in Planyt to the original Trello cards; links open in a new tab and do not change Trello.
 
+- Added the PROAD integration boundary with capability-gated writes for time booking and privileged project/contact/offer creation.
+- Added ADR 0004 defining per-user PROAD rights, explicit-action requirements, encrypted per-user credentials, and the rule that offer creation stays disabled until the installed PROAD offer endpoint is verified.
+- Added tests for the PROAD write policy.
+
 Author: OpenAI GPT-5.6 Sol
