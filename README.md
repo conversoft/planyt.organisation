@@ -47,6 +47,16 @@ For local development:
 php -S 127.0.0.1:8080 -t public
 ```
 
+## One-time Google setup
+
+Google's OAuth application is configured once by the administrator. Regular users only see **Mit Google anmelden**.
+
+Detailed step-by-step instructions:
+
+- [Google OAuth einmalig einrichten](docs/admin/google-oauth-setup.md)
+
+The installation stores the Google OAuth client configuration in protected runtime storage; no `.env` file is required.
+
 ## One-time Trello setup
 
 Trello's OAuth application credentials are installation-level settings. They are configured once by the administrator, never by employees:
@@ -59,11 +69,9 @@ The command asks interactively for Client-ID, Client-Secret and the callback URL
 
 After that, every employee only uses the **Trello verbinden** button.
 
-## Existing Google login integration
+## Google user connection
 
-Planyt does not implement a second Google login. `ExistingGoogleLogin` imports the Google access token from the existing authenticated session and stores the per-user connection in the runtime token store.
-
-If the existing login does not yet request all required Google permissions, those permissions must be added to that existing login rather than creating a second OAuth application inside Planyt.
+After the one-time installation setup, each user only clicks **Mit Google anmelden**. Google handles account selection and consent, then Planyt stores the user's OAuth connection encrypted in runtime storage.
 
 ## Runtime data
 
