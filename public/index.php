@@ -137,9 +137,10 @@ function h(string $value): string
                         <div class="account-pill"><?= h((string) ($account['email'] ?? $account['account_id'] ?? 'Google')) ?></div>
                     <?php endforeach; ?>
                     <?php if ($factory?->googleConfigured()): ?>
-                        <a class="button-link" href="/oauth/google/start.php">Google-Konto verbinden</a>
+                        <a class="button-link" href="/oauth/google/start.php">Google verbinden</a>
                     <?php else: ?>
-                        <span class="muted">Google noch nicht am Host konfiguriert.</span>
+                        <a class="button-link disabled" href="#" aria-disabled="true">Google verbinden</a>
+                        <span class="muted">OAuth-Client am Host noch nicht konfiguriert.</span>
                     <?php endif; ?>
                 </div>
                 <div class="connection-card">
@@ -176,7 +177,8 @@ function h(string $value): string
                     <?php if ($factory?->trelloConfigured()): ?>
                         <a class="button-link" href="/oauth/trello/start.php">Trello verbinden</a>
                     <?php else: ?>
-                        <span class="muted">Trello noch nicht am Host konfiguriert.</span>
+                        <a class="button-link disabled" href="#" aria-disabled="true">Trello verbinden</a>
+                        <span class="muted">OAuth-Client am Host noch nicht konfiguriert.</span>
                     <?php endif; ?>
                 </div>
             </div>
