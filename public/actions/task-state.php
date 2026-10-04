@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Storage\UserPreferencesRepository;
+use Planyt\Organisation\Storage\UserStateRepository;
 use Planyt\Organisation\Workflow\UserActionSession;
 
 $root = dirname(__DIR__, 2);
@@ -36,6 +37,14 @@ try {
     }
 
     $repository->save($userId, $preferences);
+
+    $stateRepository = new UserStateRepository($root . '/storage');
+    $dashboard = $stateRepository->load($userId);
+    $dashboard['unscheduled'] = array_values(array_filter(
+        $dashboard['unscheduled'] ?? [],
+        static fn (array $item): bool => (string) ($item['source_id'] ?? '') !== $sourceId,
+    ));
+    $stateRepository->save($userId, $dashboard);
 
     header('Location: /?task_state_saved=1#planung', true, 302);
 } catch (Throwable $exception) {
