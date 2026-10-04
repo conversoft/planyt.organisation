@@ -135,9 +135,9 @@ function h(string $value): string
                         <div class="account-pill"><?= h((string) ($account['email'] ?? $account['account_id'] ?? 'Google')) ?></div>
                     <?php endforeach; ?>
                     <?php if ($googleAccounts !== []): ?>
-                        <span class="status-ok">✓ Google-Anmeldung übernommen</span>
+                        <span class="status-ok">✓ Angemeldet</span>
                     <?php else: ?>
-                        <span class="muted">Google-Anmeldung noch nicht an Planyt übergeben.</span>
+                        <span class="muted">Bitte mit Google anmelden.</span>
                     <?php endif; ?>
                 </div>
                 <div class="connection-card">
@@ -175,7 +175,7 @@ function h(string $value): string
                         <a class="button-link" href="/oauth/trello/start.php">Trello verbinden</a>
                     <?php else: ?>
                         <a class="button-link disabled" href="#" aria-disabled="true">Trello verbinden</a>
-                        <span class="muted">OAuth-Client am Host noch nicht konfiguriert.</span>
+                        <span class="muted">Trello ist für diese Installation noch nicht freigeschaltet.</span>
                     <?php endif; ?>
                 </div>
             </div>
