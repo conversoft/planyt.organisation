@@ -42,4 +42,7 @@
 
 - Added per-user local task states: `done` and `irrelevant`. These states only affect Planyt and never write to or mutate Trello.
 
+- Trello items marked `done` or `irrelevant` are removed from the local dashboard immediately and remain filtered on future syncs; Trello is never changed.
+- Added a per-user `Ausblenden` action for Gmail attention items. Hidden mail threads stay out of Planyt on future syncs while Gmail remains read-only.
+
 Author: OpenAI GPT-5.6 Sol
