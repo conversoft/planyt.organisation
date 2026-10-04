@@ -13,7 +13,14 @@ final class GoogleConnection
     public function __construct(
         private readonly HttpClientInterface $http,
         private readonly EncryptedTokenStore $tokens,
+        private readonly ?GoogleOAuthClient $oauth = null,
     ) {
+    }
+
+    /** @param array<string, mixed> $token */
+    public function storeNew(string $userId, array $token): string
+    {
+        return $this->storeFromExistingLogin($userId, $token);
     }
 
     /** @param array<string, mixed> $token */
@@ -57,7 +64,17 @@ final class GoogleConnection
         }
 
         if ((int) ($token['expires_at'] ?? PHP_INT_MAX) <= time() + 60) {
-            throw new RuntimeException('Google login token expired. Please sign in with Google again.');
+            $refreshToken = (string) ($token['refresh_token'] ?? '');
+
+            if ($refreshToken === '' || $this->oauth === null) {
+                throw new RuntimeException('Google-Anmeldung ist abgelaufen. Bitte erneut mit Google anmelden.');
+            }
+
+            $refreshed = $this->oauth->refresh($refreshToken);
+            $token = array_merge($token, $refreshed);
+            $token['refresh_token'] = $refreshToken;
+            $token['expires_at'] = time() + (int) ($refreshed['expires_in'] ?? 3600);
+            $this->tokens->save($userId, 'google', $accountId, $token);
         }
 
         $accessToken = (string) ($token['access_token'] ?? '');
