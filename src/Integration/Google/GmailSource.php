@@ -127,6 +127,10 @@ final class GmailSource
                 'source' => 'gmail',
                 'account' => $accountId,
                 'thread_id' => (string) $thread['id'],
+                'url' => 'https://mail.google.com/mail/u/?authuser='
+                    . rawurlencode($accountId)
+                    . '#all/'
+                    . rawurlencode((string) $thread['id']),
                 'title' => $subject,
                 'from' => $from,
                 'received' => $headersMap['date'] ?? '',
