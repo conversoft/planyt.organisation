@@ -11,7 +11,8 @@
     "php": "8.4",
     "portableState": "json",
     "technicalMetadata": "sqlite-optional",
-    "javascript": "native-first"
+    "javascript": "native-first",
+    "configuration": "zero-env-runtime"
   },
   "integrations": {
     "trello": {
@@ -25,7 +26,7 @@
     },
     "gmail": {
       "mode": "read-only",
-      "auth": "google-oauth2",
+      "auth": "existing-google-login",
       "scopes": [
         "https://www.googleapis.com/auth/gmail.readonly"
       ],
@@ -33,14 +34,14 @@
     },
     "googleDrive": {
       "mode": "read-only",
-      "auth": "google-oauth2",
+      "auth": "existing-google-login",
       "scopes": [
         "https://www.googleapis.com/auth/drive.readonly"
       ]
     },
     "googleCalendar": {
       "mode": "read-write-owned",
-      "auth": "google-oauth2",
+      "auth": "existing-google-login",
       "scopes": [
         "https://www.googleapis.com/auth/calendar.events.owned"
       ],
@@ -57,8 +58,9 @@
     "strategy": "fast-forward-only"
   },
   "storage": {
-    "tokens": "libsodium-encrypted-files",
+    "tokens": "per-user-encrypted-tokens.json",
     "userState": "json",
-    "technicalMetadata": "sqlite-optional"
+    "technicalMetadata": "sqlite-optional",
+    "installationConfig": "storage/system/config.json"
   }
 }
