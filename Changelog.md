@@ -26,4 +26,11 @@
 - Added explicit Google and Trello Connect buttons.
 - Unified Google and Trello OAuth storage into per-user `tokens.json`, with encrypted provider payloads and legacy token migration.
 
+- Removed the standalone Google OAuth flow and duplicate Google client configuration.
+- Reused the existing Google login as the source of Google identity and access tokens.
+- Removed the normal runtime dependency on `.env`.
+- Added automatic installation-key generation in protected storage.
+- Added one-time administrator Trello configuration via `php bin/planyt trello:configure`.
+- Simplified employee-facing connection language to Google login status and a single Trello Connect action.
+
 Author: OpenAI GPT-5.6 Sol
