@@ -1,0 +1,15 @@
+{
+  "user": {"id":"demo","name":"Alex","timezone":"Europe/Berlin"},
+  "today": [
+    {"id":"calendar-1","source":"calendar","time":"09:00–10:00","title":"Angebot Müller fertigstellen","meta":"Persönlicher Arbeitsblock"},
+    {"id":"calendar-2","source":"calendar","time":"14:00–14:30","title":"Rückruf Projekt Nord","meta":"Persönlicher Kalender"}
+  ],
+  "unscheduled": [
+    {"id":"trello-42","source":"trello","title":"Präsentation für Jour fixe vorbereiten","due":"2026-10-06","context":"Board: Kundenprojekte · Liste: Diese Woche","body":"Folien aktualisieren und offene Punkte aus dem letzten Termin einarbeiten."},
+    {"id":"trello-51","source":"trello","title":"Website-Texte prüfen","due":"","context":"Board: Website Relaunch · Liste: Offen","body":"Neue Startseitentexte redaktionell prüfen."}
+  ],
+  "emails": [
+    {"id":"mail-11","source":"gmail","account":"arbeit@example.com","title":"Rückfrage zum Angebot Müller","from":"Max Müller","received":"2026-10-04T14:18:00+02:00","needsReply":true,"body":"Können Sie bitte bestätigen, ob die Umsetzung noch im Oktober möglich ist?","context":"Zugehörige Trello-Aufgabe: Angebot Müller fertigstellen."},
+    {"id":"mail-12","source":"gmail","account":"projekte@example.com","title":"Freigabe Startseitentexte","from":"Projektteam","received":"2026-10-03T16:42:00+02:00","needsReply":true,"body":"Bitte gib uns eine kurze Rückmeldung zu den neuen Texten.","context":"Zugehörige Trello-Aufgabe: Website-Texte prüfen."}
+  ]
+}
