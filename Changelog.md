@@ -76,4 +76,7 @@
 
 - Fixed email preview spacing by removing duplicate newline rendering, and made `E-Mail öffnen` available for already-synced mail items by deriving the Gmail thread URL from stored thread/account data when needed.
 
+- Limited email previews to 800px with `Mehr anzeigen` / `Weniger anzeigen` controls.
+- Kept email action buttons in a sticky action bar so `E-Mail öffnen`, `Ausblenden` and `Antwort-Prompt erstellen` remain visible while reading long messages.
+
 Author: OpenAI GPT-5.6 Sol
