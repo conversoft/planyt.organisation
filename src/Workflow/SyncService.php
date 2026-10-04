@@ -28,7 +28,11 @@ final class SyncService
         $events = [];
         $boardsByAccount = [];
 
-        foreach ($this->integrations->trelloConnection()->accounts($userId) as $account) {
+        $trelloAccounts = $this->integrations->trelloConfigured()
+            ? $this->integrations->trelloConnection()->accounts($userId)
+            : [];
+
+        foreach ($trelloAccounts as $account) {
             $accountId = (string) ($account['account_id'] ?? '');
 
             if ($accountId === '') {
@@ -50,7 +54,11 @@ final class SyncService
         $rangeStart = $now->setTime(0, 0);
         $rangeEnd = $rangeStart->modify('+30 days');
 
-        foreach ($this->integrations->googleConnection()->accounts($userId) as $account) {
+        $googleAccounts = $this->integrations->googleConfigured()
+            ? $this->integrations->googleConnection()->accounts($userId)
+            : [];
+
+        foreach ($googleAccounts as $account) {
             $accountId = (string) ($account['account_id'] ?? '');
 
             if ($accountId === '') {
