@@ -1,71 +1,69 @@
 # planyt.organisation
 
-Planyt Organisation is a personal work overview that connects Trello, Gmail, Google Drive and Google Calendar without replacing the source systems.
+Planyt Organisation is a personal work overview for Trello, Gmail, Google Drive and Google Calendar.
 
 ## Product rules
 
-- **Trello remains the source of truth for tasks.**
-- Trello is strictly read-only.
-- Gmail is strictly read-only; Planyt cannot send mail or create drafts.
+- Trello remains the source of truth for tasks and is strictly read-only.
+- Gmail is strictly read-only. Planyt cannot send mail or create drafts.
 - Google Drive is read-only.
-- Google Calendar is the personal scheduling layer and is the only integration with write access.
-- Calendar writes require an explicit user action.
+- Google Calendar is the only integration with write access and only receives explicitly confirmed personal planning blocks.
 - Calendar state never completes, moves or changes Trello cards.
-- AI support is provided through the local Prompt Compiler; no AI API is required.
+- The Prompt Compiler creates copyable text only. Planyt has no outbound AI or communication action.
 
-## Technical baseline
+## User experience
 
-- PHP 8.4
-- Composer
-- JSON for portable user state
-- encrypted file storage for OAuth tokens
-- SQLite remains optional for later technical metadata/indexing
-- native JavaScript
-- PSR-1, PSR-4 and PSR-12
-- direct maintenance on `main`
+Regular users do not configure OAuth clients, secrets, callback URLs or environment files.
 
-## Real integrations
-
-### Google
-
-One or more Google accounts can be connected per Planyt user.
-
-Requested scopes:
+Google is taken from the application's existing Google login. Planyt expects that login to provide an access token with these permissions:
 
 - `gmail.readonly`
 - `drive.readonly`
 - `calendar.events.owned`
 
-The Google OAuth client must be configured as a Web application and its callback URI must match `GOOGLE_REDIRECT_URI`.
+The dashboard only shows whether Google is available.
 
-### Trello
+Trello is the only additional account connection visible to a user. The user clicks **Trello verbinden**, authorizes read access in Atlassian/Trello and returns to Planyt.
 
-Trello uses OAuth 2.0 with a confidential client and PKCE.
+## Installation
 
-Requested scopes:
+Requirements:
 
-- `read:member:trello`
-- `read:board:trello`
-- `offline_access`
+- PHP 8.4
+- Composer
+- PHP extensions: cURL, JSON and Sodium
 
-No Trello write scope is requested anywhere in the application.
-
-Each user can select which of their accessible Trello boards should contribute cards to their personal overview. Only open cards assigned to that Trello member are included.
-
-## Local setup
+Install dependencies:
 
 ```bash
 composer install
-cp .env.example .env
 ```
 
-Set a long random `APP_KEY`, configure the Google and/or Trello OAuth clients, then start the prototype:
+No `.env` file is required. On first start Planyt automatically creates its installation key in protected runtime storage.
+
+For local development:
 
 ```bash
 php -S 127.0.0.1:8080 -t public
 ```
 
-The configured OAuth callback URLs must exactly match the URLs in `.env`.
+## One-time Trello setup
+
+Trello's OAuth application credentials are installation-level settings. They are configured once by the administrator, never by employees:
+
+```bash
+php bin/planyt trello:configure
+```
+
+The command asks interactively for Client-ID, Client-Secret and the callback URL and stores them in protected runtime configuration. They do not belong in Git or in a user-facing settings screen.
+
+After that, every employee only uses the **Trello verbinden** button.
+
+## Existing Google login integration
+
+Planyt does not implement a second Google login. `ExistingGoogleLogin` imports the Google access token from the existing authenticated session and stores the per-user connection in the runtime token store.
+
+If the existing login does not yet request all required Google permissions, those permissions must be added to that existing login rather than creating a second OAuth application inside Planyt.
 
 ## Runtime data
 
@@ -73,6 +71,8 @@ Runtime data never belongs in Git:
 
 ```
 storage/
+  system/
+    config.json
   users/
     <user-id>/
       dashboard.json
@@ -80,55 +80,41 @@ storage/
       tokens.json
 ```
 
-Google and Trello connection data are stored together in `tokens.json`. The actual OAuth payload for each provider/account is encrypted with libsodium using a key derived from `APP_KEY`. The application stores no provider password. Existing legacy `.token` files are read and migrated automatically.
+`storage/system/config.json` contains the automatically generated installation key and optional installation-level provider configuration.
+
+`tokens.json` contains the user's Google and Trello connections. OAuth payloads are encrypted with libsodium before they are written.
 
 ## Synchronization
 
 A sync:
 
-1. pulls connected Trello boards and assigned open cards,
-2. pulls recent Gmail inbox threads and identifies reply candidates,
-3. reads the next 30 days of owned Google Calendar events,
-4. matches Planyt-created calendar blocks back to their Trello source IDs,
-5. writes the resulting personal view to the user's local `dashboard.json`.
+1. reads assigned open Trello cards from the selected boards,
+2. reads recent Gmail threads and identifies likely reply candidates,
+3. reads owned Google Calendar events,
+4. compares Trello cards with Planyt-created work blocks,
+5. writes the derived personal overview to the user's local JSON state.
 
-Syncing never writes to Trello, Gmail or Drive.
+Sync never writes to Trello, Gmail or Drive.
 
 ## Scheduling
 
-For an unscheduled Trello card, the user explicitly chooses:
-
-- date,
-- time,
-- duration,
-- destination Google account.
-
-Only that submit action can create the calendar event. The event stores the Trello card ID as a private extended property, but nothing is written back to Trello.
-
-## Prompt Compiler
-
-Planyt can compile Gmail or Trello context into a copyable prompt. The prompt is only copied to the clipboard.
-
-There is:
-
-- no OpenAI API dependency,
-- no AI usage billing in Planyt,
-- no mail-send capability,
-- no automatic external communication.
+For an unscheduled Trello card, the user explicitly chooses date, time, duration and Google account. Only this confirmed action can create a Calendar event. Nothing is written back to Trello.
 
 ## Host update
 
-Every installation follows `main`.
+Every installation follows `main`:
 
 ```bash
 php bin/planyt update
 ```
 
-The updater refuses local source modifications, requires the host to be on `main`, fetches `origin/main`, performs a fast-forward-only update and reinstalls production dependencies.
+The updater refuses local source modifications and only fast-forwards to `origin/main`.
 
 ## Security
 
-- Never commit `.env`, OAuth tokens or other secrets.
-- Production installations should use HTTPS.
-- Provider permissions are intentionally narrower than the provider capabilities.
-- Any future request for Gmail/Trello write permissions requires a new ADR and an explicit maintainer decision.
+- No secrets are committed.
+- No `.env` setup is required.
+- The installation key is generated automatically and stored outside the public web root.
+- User OAuth data is encrypted at rest.
+- Gmail, Drive and Trello write permissions are forbidden by architecture.
+- Any future expansion of provider permissions requires an explicit ADR.
