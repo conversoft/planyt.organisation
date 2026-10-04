@@ -88,13 +88,18 @@ final class SyncService
             }
         }
 
+        $taskStates = is_array($prefs['task_states'] ?? null) ? $prefs['task_states'] : [];
+
         $unscheduled = array_values(array_filter(
             $trelloItems,
-            static function (array $item) use ($scheduledSourceIds): bool {
+            static function (array $item) use ($scheduledSourceIds, $taskStates): bool {
                 $sourceId = (string) ($item['source_id'] ?? '');
+
+                $localState = (string) ($taskStates[$sourceId] ?? '');
 
                 return !($item['due_complete'] ?? false)
                     && $sourceId !== ''
+                    && !in_array($localState, ['done', 'irrelevant'], true)
                     && !isset($scheduledSourceIds[$sourceId]);
             },
         ));
