@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use Planyt\Organisation\Config\DotEnv;
-use Planyt\Organisation\Config\Env;
+use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Integration\Calendar\ExplicitUserAction;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\Storage\UserPreferencesRepository;
@@ -13,7 +12,6 @@ use Planyt\Organisation\Workflow\UserActionSession;
 
 $root = dirname(__DIR__, 2);
 require $root . '/vendor/autoload.php';
-DotEnv::load($root . '/.env');
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -29,7 +27,7 @@ try {
     $actionToken = (string) ($_POST['action_token'] ?? '');
 
     if ($sourceId === '' || $title === '' || $accountId === '' || $date === '' || $time === '') {
-        throw new RuntimeException('Please choose date and time before scheduling.');
+        throw new RuntimeException('Bitte Datum und Uhrzeit auswählen.');
     }
 
     $action = (new UserActionSession())->consume($actionToken, 'schedule', $sourceId);
@@ -37,7 +35,7 @@ try {
     $end = $start->modify('+' . $duration . ' minutes');
 
     $factory = new IntegrationFactory($root);
-    $userId = Env::get('PLANYT_USER_ID', 'demo') ?? 'demo';
+    $userId = CurrentUser::id();
 
     $factory->calendar()->createPlanningBlock(
         $userId,
