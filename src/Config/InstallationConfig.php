@@ -27,6 +27,39 @@ final class InstallationConfig
     }
 
     /** @return array{client_id:string,client_secret:string,redirect_uri:string}|null */
+    public function google(): ?array
+    {
+        $document = $this->load();
+        $google = $document['google'] ?? null;
+
+        if (!is_array($google)) {
+            return null;
+        }
+
+        $clientId = trim((string) ($google['client_id'] ?? ''));
+        $clientSecret = trim((string) ($google['client_secret'] ?? ''));
+        $redirectUri = trim((string) ($google['redirect_uri'] ?? ''));
+
+        if ($clientId === '' || $clientSecret === '' || $redirectUri === '') {
+            return null;
+        }
+
+        return [
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'redirect_uri' => $redirectUri,
+        ];
+    }
+
+    /** @param array{client_id:string,client_secret:string,redirect_uri:string} $config */
+    public function saveGoogle(array $config): void
+    {
+        $document = $this->load();
+        $document['google'] = $config;
+        $this->save($document);
+    }
+
+    /** @return array{client_id:string,client_secret:string,redirect_uri:string}|null */
     public function trello(): ?array
     {
         $document = $this->load();
