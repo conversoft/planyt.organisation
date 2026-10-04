@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-use Planyt\Organisation\Config\DotEnv;
 use Planyt\Organisation\Integration\IntegrationFactory;
 use Planyt\Organisation\OAuth\OAuthSession;
 use Planyt\Organisation\OAuth\Pkce;
 
 $root = dirname(__DIR__, 3);
 require $root . '/vendor/autoload.php';
-DotEnv::load($root . '/.env');
 
 $pkce = Pkce::create();
 $session = new OAuthSession();
