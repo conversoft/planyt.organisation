@@ -77,14 +77,10 @@ storage/
     <user-id>/
       dashboard.json
       preferences.json
-      connections/
-        google/
-          <account>.token
-        trello/
-          <account>.token
+      tokens.json
 ```
 
-OAuth connection files are encrypted with libsodium using a key derived from `APP_KEY`. The application stores no provider password.
+Google and Trello connection data are stored together in `tokens.json`. The actual OAuth payload for each provider/account is encrypted with libsodium using a key derived from `APP_KEY`. The application stores no provider password. Existing legacy `.token` files are read and migrated automatically.
 
 ## Synchronization
 
