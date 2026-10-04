@@ -33,7 +33,8 @@ final class UserActionSession
         $payload = $_SESSION['user_actions'][$token] ?? null;
         unset($_SESSION['user_actions'][$token]);
 
-        if (!is_array($payload)
+        if (
+            !is_array($payload)
             || ($payload['purpose'] ?? null) !== $purpose
             || ($payload['subject_id'] ?? null) !== $subjectId
             || (int) ($payload['issued_at'] ?? 0) < time() - 1800
