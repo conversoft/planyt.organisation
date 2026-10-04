@@ -24,6 +24,7 @@ $error = $_GET['integration_error'] ?? null;
 $factory = null;
 $googleAccounts = [];
 $trelloAccounts = [];
+$proadConnected = false;
 $liveMode = true;
 
 if ($liveMode) {
@@ -34,6 +35,9 @@ if ($liveMode) {
         $trelloAccounts = $factory->trelloConfigured()
             ? $factory->trelloConnection()->accounts($userId)
             : [];
+        $proadConnected = $factory->proadConfigured()
+            ? $factory->proadConnection()->connected($userId)
+            : false;
         $data = (new UserStateRepository($root . '/storage'))->load($userId);
 
         $taskStates = is_array($preferences['task_states'] ?? null) ? $preferences['task_states'] : [];
@@ -108,6 +112,7 @@ function h(string $value): string
             <p>● Gmail <small>read-only</small></p>
             <p>● Drive <small>read-only</small></p>
             <p>● Calendar <small>read/write</small></p>
+            <p>● PROAD <small>nach Berechtigung</small></p>
         </div>
     </aside>
 
@@ -196,6 +201,23 @@ function h(string $value): string
                     <?php else: ?>
                         <a class="button-link disabled" href="#" aria-disabled="true">Trello verbinden</a>
                         <span class="muted">Trello ist für diese Installation noch nicht freigeschaltet.</span>
+                    <?php endif; ?>
+                </div>
+                <div class="connection-card">
+                    <strong>PROAD</strong>
+                    <p>Projekte und Zeiten. Erweiterte Funktionen nur mit deinen PROAD-Rechten.</p>
+                    <?php if ($factory?->proadConfigured()): ?>
+                        <?php if ($proadConnected): ?>
+                            <span class="status-ok">✓ Verbunden</span>
+                        <?php else: ?>
+                            <form method="post" action="/actions/proad-connect.php" class="board-form">
+                                <label class="small-label" for="proad-api-key">Persönlicher API-Key</label>
+                                <input id="proad-api-key" type="password" name="api_key" autocomplete="off" required>
+                                <button class="secondary" type="submit">PROAD verbinden</button>
+                            </form>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <span class="muted">PROAD ist für diese Installation noch nicht freigeschaltet.</span>
                     <?php endif; ?>
                 </div>
             </div>
