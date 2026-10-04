@@ -66,4 +66,6 @@
 
 - Made the connections disclosure arrow larger, high-contrast and easier to recognize as an interactive toggle.
 
+- Added automatic CSS cache busting so frontend style changes, including the prominent connections toggle, appear immediately after updates.
+
 Author: OpenAI GPT-5.6 Sol
