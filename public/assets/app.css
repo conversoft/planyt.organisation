@@ -94,7 +94,22 @@ h3 { font-size: 18px; margin-bottom: 0; }
 .actions form { margin: 0; }
 .mail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding-top: 16px; }
 .mail-card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-.mail-card blockquote { margin: 14px 0; padding-left: 12px; border-left: 3px solid var(--line); color: #444941; }
+.mail-body {
+    margin: 14px 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--line);
+    color: #444941;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
+    min-width: 0;
+    line-height: 1.45;
+}
+.mail-card { min-width: 0; overflow: hidden; }
+.mail-card strong,
+.mail-card p,
+.mail-card .mail-body { overflow-wrap: anywhere; }
 .prompt-panel { margin-top: 20px; }
 .prompt-panel textarea { width: 100%; min-height: 340px; margin: 16px 0 10px; border: 1px solid var(--line); border-radius: 12px; padding: 15px; resize: vertical; background: #fbfbf8; }
 .hint { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
