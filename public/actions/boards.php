@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-use Planyt\Organisation\Config\DotEnv;
-use Planyt\Organisation\Config\Env;
+use Planyt\Organisation\Auth\CurrentUser;
 use Planyt\Organisation\Storage\UserPreferencesRepository;
 
 $root = dirname(__DIR__, 2);
 require $root . '/vendor/autoload.php';
-DotEnv::load($root . '/.env');
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -27,7 +25,7 @@ try {
         static fn (string $id): bool => $id !== '',
     )));
 
-    $userId = Env::get('PLANYT_USER_ID', 'demo') ?? 'demo';
+    $userId = CurrentUser::id();
     $repository = new UserPreferencesRepository($root . '/storage');
     $preferences = $repository->load($userId);
     $preferences['trello_boards'] ??= [];
